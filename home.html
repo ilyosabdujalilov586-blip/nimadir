@@ -534,6 +534,77 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* Profile Offcanvas */
+    .profile-offcanvas {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(320px, 85vw);
+      height: 100vh;
+      background: rgba(16, 21, 36, 0.95);
+      backdrop-filter: blur(16px);
+      border-left: 1px solid var(--line);
+      z-index: 100;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .profile-offcanvas.open {
+      transform: translateX(0);
+    }
+    .offcanvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+    .close-offcanvas-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-muted);
+      cursor: pointer;
+      padding: 4px;
+    }
+    .close-offcanvas-btn:hover {
+      color: var(--ink);
+    }
+    .offcanvas-user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+    .offcanvas-user-info img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--line-glow);
+    }
+    .account-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      cursor: pointer;
+    }
+    .account-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    .account-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -550,6 +621,12 @@
       <a href="#services">Xizmatlar</a>
       <a href="#library">Kutubxona</a>
       <a href="#contact">Aloqa</a>
+      
+      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili">
+        <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff">
+        <span class="account-name" id="accountName">Profil</span>
+      </div>
+
       <a class="ai-btn" href="./AI.html"> AI rejimi</a>
     </nav>
     <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menyuni ochish" aria-controls="navLinks" aria-expanded="false">
@@ -559,6 +636,20 @@
     </button>
   </header>
   <div class="menu-backdrop" id="menuBackdrop"></div>
+
+  <div class="profile-offcanvas" id="profileOffcanvas">
+    <div class="offcanvas-header">
+      <h2 style="margin: 0; font-size: 18px;">Profil Ma'lumotlari</h2>
+      <button type="button" class="close-offcanvas-btn" id="closeOffcanvasBtn" aria-label="Yopish">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="offcanvas-user-info">
+      <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="Profil">
+      <h3 style="margin: 0; font-size: 20px;" id="offcanvasName">Foydalanuvchi</h3>
+      <p style="margin: 0; color: var(--ink-muted); font-size: 14px;" id="offcanvasEmail">user@example.com</p>
+    </div>
+  </div>
 
   <main id="home">
     <section data-aos="fade-up">
@@ -664,7 +755,32 @@
     }
 
     if (burgerBtn) burgerBtn.addEventListener('click', toggleMenu);
-    if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+    
+    const profileOffcanvas = document.getElementById('profileOffcanvas');
+    const closeOffcanvasBtn = document.getElementById('closeOffcanvasBtn');
+    const accountBadge = document.getElementById('accountBadge');
+
+    function openOffcanvas() {
+      profileOffcanvas.classList.add('open');
+      if (menuBackdrop) menuBackdrop.classList.add('is-active');
+    }
+
+    function closeOffcanvas() {
+      profileOffcanvas.classList.remove('open');
+      if (!navLinks.classList.contains('is-active')) {
+        if (menuBackdrop) menuBackdrop.classList.remove('is-active');
+      }
+    }
+
+    if (accountBadge) accountBadge.addEventListener('click', openOffcanvas);
+    if (closeOffcanvasBtn) closeOffcanvasBtn.addEventListener('click', closeOffcanvas);
+
+    if (menuBackdrop) {
+      menuBackdrop.addEventListener('click', () => {
+        closeMenu();
+        closeOffcanvas();
+      });
+    }
 
     if (navLinks) {
       navLinks.querySelectorAll('a').forEach(link => {
