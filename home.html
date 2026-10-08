@@ -622,7 +622,7 @@
       
       <a class="ai-btn" href="./AI.html"> AI rejimi</a>
 
-      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili">
+      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili" style="display: none;">
         <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff">
         <span class="account-name" id="accountName">Profil</span>
       </div>
@@ -796,9 +796,23 @@
     // Tizimga kirgan foydalanuvchi ismini chiqarish
     try {
       const activeUser = JSON.parse(localStorage.getItem('ilyosActiveUser') || 'null');
+      const badgeEl = document.getElementById('accountBadge');
       if (activeUser && activeUser.name) {
-        const brandNameEl = document.getElementById('brandAccountName');
-        if (brandNameEl) brandNameEl.textContent = activeUser.name;
+        if (badgeEl) badgeEl.style.display = 'flex';
+        const avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(activeUser.name) + '&background=6366F1&color=fff';
+        
+        const accAvatar = document.getElementById('accountAvatar');
+        if (accAvatar) accAvatar.src = avatarUrl;
+        
+        const offcanvasName = document.getElementById('offcanvasName');
+        const offcanvasEmail = document.getElementById('offcanvasEmail');
+        const offcanvasImg = document.querySelector('.offcanvas-user-info img');
+        
+        if (offcanvasName) offcanvasName.textContent = activeUser.name;
+        if (offcanvasEmail) offcanvasEmail.textContent = activeUser.email || '';
+        if (offcanvasImg) offcanvasImg.src = avatarUrl;
+      } else {
+        if (badgeEl) badgeEl.style.display = 'none';
       }
     } catch(e) {}
 
