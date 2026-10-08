@@ -610,11 +610,9 @@
 <body>
   <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
   <header data-aos="fade-down" data-aos-duration="700">
-    <div class="brand">
-      <div class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <span id="brandAccountName">Ilyos</span>
+    <div class="brand" style="display: flex; align-items: center; gap: 8px;">
+      <img src="favicon.svg" alt="Ilyos AI Logo" style="width: 28px; height: 28px;">
+      <span id="brandAccountName" style="font-size: 20px; margin: 0; background: none; -webkit-background-clip: unset; color: inherit; max-width: none;">IlYOS AI</span>
     </div>
     <nav class="nav-links" id="navLinks" aria-label="Asosiy navigatsiya">
       <a class="active" href="#home">Bosh sahifa</a>
@@ -622,12 +620,12 @@
       <a href="#library">Kutubxona</a>
       <a href="#contact">Aloqa</a>
       
+      <a class="ai-btn" href="./AI.html"> AI rejimi</a>
+
       <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili">
         <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff">
         <span class="account-name" id="accountName">Profil</span>
       </div>
-
-      <a class="ai-btn" href="./AI.html"> AI rejimi</a>
     </nav>
     <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menyuni ochish" aria-controls="navLinks" aria-expanded="false">
       <span></span>
