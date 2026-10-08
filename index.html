@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilyos | Kirish va Ro'yxatdan o'tish</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="./cursor.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        :root {
+            --black: #080B14;
+            --panel: #101524;
+            --panel-soft: #171E32;
+            --line: rgba(139, 92, 246, 0.25);
+            --text: #f3f4f6;
+            --muted: #94a3b8;
+            --purple: #C084FC;
+            --purple-strong: #8B5CF6;
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+            min-height: 100%;
+            width: 100%;
+        }
+        body {
+            margin: 0;
+            background: #080B14;
+            color: var(--text);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        main, section, .parent { min-height: 100vh; }
+
+        .parent {
+            display: grid;
+            place-items: center;
+            padding: 28px 18px;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, .2), transparent 45%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, .15), transparent 45%),
+                #080B14;
+        }
+
+        .sing-up {
+            position: relative;
+            width: min(100%, 430px);
+            padding: 38px 32px 34px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(23, 30, 50, .98), rgba(10, 13, 24, .98));
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .65);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--line);
+        }
+
+        .auth-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 9px;
+            transition: all 0.2s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--purple-strong);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .sing-up-title {
+            margin: 0 0 20px;
+            color: var(--text);
+            font-size: clamp(1.5rem, 5vw, 1.9rem);
+            font-weight: 800;
+            line-height: 1.1;
+            text-align: center;
+            letter-spacing: -.04em;
+            background: linear-gradient(135deg, #FFFFFF 0%, #C084FC 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sing-up form {
+            display: none;
+            gap: 9px;
+        }
+
+        .sing-up form.active-form {
+            display: grid;
+        }
+
+        .email-title, .password-title, .name-title {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .email-input, .password-input, .name-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            outline: none;
+            padding: 14px 15px;
+            background: rgba(255, 255, 255, .035);
+            color: var(--text);
+            font: inherit;
+            font-size: .95rem;
+            transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
+        }
+
+        .email-input:focus, .password-input:focus, .name-input:focus {
+            border-color: var(--purple-strong);
+            background: rgba(139, 92, 246, .1);
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, .2);
+        }
+
+        .sing-up-link {
+            display: block;
+            width: 100%;
+            margin-top: 17px;
+            border: 1px solid var(--purple-strong);
+            border-radius: 13px;
+            padding: 13px 18px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #D946EF 100%);
+            color: #FFFFFF;
+            font-size: .95rem;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+            box-shadow: 0 4px 18px rgba(139, 92, 246, .35);
+        }
+
+        .sing-up-link:hover {
+            filter: brightness(1.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(139, 92, 246, .45);
+        }
+
+        .google-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0 12px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .google-divider::before, .google-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--line);
+        }
+        .google-divider::before { margin-right: 10px; }
+        .google-divider::after { margin-left: 10px; }
+
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font-family: inherit;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--purple-strong);
+            transform: translateY(-2px);
+        }
+        .google-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .login-error {
+            min-height: 20px;
+            margin: 14px 0 0;
+            color: #ff8f82;
+            font-size: .82rem;
+            font-weight: 700;
+            text-align: center;
+            word-break: break-word;
+        }
+        .login-error.success { color: #4ade80; }
+        .login-error.is-visible { animation: errorShake .3s ease; }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            30% { transform: translateX(-6px); }
+            70% { transform: translateX(6px); }
+        }
+
+        @media (max-width: 520px) {
+            .parent {
+                padding: 16px 12px;
+            }
+            .sing-up {
+                width: min(100%, 100%);
+                padding: 26px 18px 22px;
+                border-radius: 20px;
+            }
+            .sing-up-title {
+                font-size: 1.5rem;
+                margin-bottom: 16px;
+            }
+            .auth-tabs {
+                margin-bottom: 18px;
+            }
+            .auth-tab {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            .email-input, .password-input, .name-input {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+            .sing-up-link, .google-btn {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+            .google-btn {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .sing-up {
+                padding: 22px 14px 18px;
+            }
+            .auth-tabs {
+                gap: 6px;
+                padding: 3px;
+            }
+            .auth-tab {
+                font-size: 0.8rem;
+                padding: 7px 6px;
+            }
+            .sing-up-title {
+                font-size: 1.35rem;
+            }
+            .email-title, .password-title, .name-title {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+    <main>
+        <section>
+            <div class="parent">
+                <div class="sing-up">
+                    
+                    <!-- Tablar -->
+                    <div class="auth-tabs" id="authTabsContainer">
+                        <button class="auth-tab active" id="tabLogin">Kirish</button>
+                        <button class="auth-tab" id="tabRegister">Ro'yxatdan o'tish</button>
+                    </div>
+
+                    <h1 class="sing-up-title" id="formTitle">Tizimga kirish</h1>
+
+                    <!-- Kirish Formasi -->
+                    <form id="loginForm" class="active-form">
+                        <label class="email-title" for="emailInput">Email</label>
+                        <input id="emailInput" class="email-input" type="email" placeholder="Email kiriting" required>
+                    
+                        <label class="password-title" for="passwordInput">Parol</label>
+                        <input id="passwordInput" class="password-input" type="password" placeholder="Parol kiriting" required>
+                    
+                        <button class="sing-up-link" type="submit">Kirish</button>
+
+                        <div class="google-divider">yoki</div>
+                        <button type="button" class="google-btn" id="googleLoginBtn">
+                            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                            Google orqali kirish
+                        </button>
+                    </form>
+
+                    <!-- Ro'yxatdan o'tish Formasi -->
+                    <form id="registerForm">
+                        <label class="name-title" for="nameInput">Ism</label>
+                        <input id="nameInput" class="name-input" type="text" placeholder="Ismingizni kiriting" required>
+
+                        <label class="email-title" for="regEmailInput">Email</label>
+                        <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" required>
+                    
+                        <label class="password-title" for="regPasswordInput">Parol</label>
+                        <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" required>
+                    
+                        <button class="sing-up-link" type="submit">Ro'yxatdan o'tish</button>
+
+                        <div class="google-divider">yoki</div>
+                        <button type="button" class="google-btn" id="googleRegisterBtn">
+                            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                            Google orqali ro'yxatdan o'tish
+                        </button>
+                    </form>
+
+                    <!-- Kodni tasdiqlash Formasi -->
+                    <form id="verifyForm">
+                        <label class="name-title" for="verifyCodeInput">Tasdiqlash kodi</label>
+                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;">Ekranga chiqqan 4 xonali kodni kiriting:</p>
+                        <input id="verifyCodeInput" class="name-input" type="text" placeholder="Kodni kiriting" maxlength="4" required>
+                        <button class="sing-up-link" type="submit">Kodni tasdiqlash</button>
+                    </form>
+
+                    <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="./cursor.js"></script>
+    <script>
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegister = document.getElementById('tabRegister');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const verifyForm = document.getElementById('verifyForm');
+        const formTitle = document.getElementById('formTitle');
+        const loginError = document.getElementById('loginError');
+        const authTabsContainer = document.getElementById('authTabsContainer');
+
+        let pendingUserData = null;
+        let generatedCode = null;
+
+        tabLogin.addEventListener('click', () => {
+            tabLogin.classList.add('active');
+            tabRegister.classList.remove('active');
+            loginForm.classList.add('active-form');
+            registerForm.classList.remove('active-form');
+            verifyForm.classList.remove('active-form');
+            formTitle.textContent = "Tizimga kirish";
+            loginError.textContent = "";
+        });
+
+        tabRegister.addEventListener('click', () => {
+            tabRegister.classList.add('active');
+            tabLogin.classList.remove('active');
+            registerForm.classList.add('active-form');
+            loginForm.classList.remove('active-form');
+            verifyForm.classList.remove('active-form');
+            formTitle.textContent = "Ro'yxatdan o'tish";
+            loginError.textContent = "";
+        });
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // 1. KIRISH QISMI
+        loginForm.addEventListener('submit', event => {
+            event.preventDefault();
+            loginError.classList.remove('is-visible');
+
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+
+            if (!isValidEmail(email)) {
+                loginError.textContent = "Iltimos, to'g'ri email manzilini kiriting!";
+                loginError.className = "login-error is-visible";
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+            const foundUser = users.find(u => u.email === email);
+
+            if (!foundUser) {
+                loginError.textContent = "Bunday akaunt mavjud emas!";
+                loginError.className = "login-error is-visible";
+                return;
+            }
+
+            if (foundUser.password !== password) {
+                loginError.textContent = "Parol noto'g'ri! Iltimos, qaytadan urinib ko'ring.";
+                loginError.className = "login-error is-visible";
+                return;
+            }
+
+            localStorage.setItem('ilyosActiveUser', JSON.stringify(foundUser));
+            loginError.textContent = "Parol to'g'ri! Tizimga muvaffaqiyatli kirdingiz.";
+            loginError.className = "login-error success is-visible";
+
+            setTimeout(() => {
+                window.location.href = './home.html';
+            }, 1000);
+        });
+
+        // 2. RO'YXATDAN O'TISH & SMS/ALERT ORQALI KOD CHIQARISH
+        registerForm.addEventListener('submit', event => {
+            event.preventDefault();
+            loginError.classList.remove('is-visible');
+
+            const name = document.getElementById('nameInput').value.trim();
+            const email = document.getElementById('regEmailInput').value.trim();
+            const password = document.getElementById('regPasswordInput').value;
+
+            if (!isValidEmail(email)) {
+                loginError.textContent = "Xato email! Haqiqiy email kiriting.";
+                loginError.className = "login-error is-visible";
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+            if (users.some(u => u.email === email)) {
+                loginError.textContent = "Bu email allaqachon ro'yxatdan o'tgan!";
+                loginError.className = "login-error is-visible";
+                return;
+            }
+
+            // 4 xonali kod генерация qilish
+            generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+            pendingUserData = { name, email, password };
+
+            // Kodni alert oynasida va pastdagi xabarda ko'rsatamiz
+            alert("loctasdiqlash kodingiz: " + generatedCode);
+
+            registerForm.classList.remove('active-form');
+            verifyForm.classList.add('active-form');
+            authTabsContainer.style.display = 'none';
+            formTitle.textContent = "Kodni tasdiqlash";
+            loginError.textContent = "Tasdiqlash kodi ekranga chiqarildi: " + generatedCode;
+            loginError.className = "login-error success is-visible";
+        });
+
+        // 3. KODNI TASDIQLASH VA SAQLASH
+        verifyForm.addEventListener('submit', event => {
+            event.preventDefault();
+            const enteredCode = document.getElementById('verifyCodeInput').value.trim();
+
+            if (enteredCode === generatedCode) {
+                const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                users.push(pendingUserData);
+                localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                localStorage.setItem('ilyosActiveUser', JSON.stringify(pendingUserData));
+
+                loginError.textContent = "Muvaffaqiyatli ro'yxatdan o'tdingiz!";
+                loginError.className = "login-error success is-visible";
+
+                setTimeout(() => {
+                    window.location.href = './home.html';
+                }, 1000);
+            } else {
+                loginError.textContent = "Kiritilgan kod noto'g'ri!";
+                loginError.className = "login-error is-visible";
+            }
+        });
+
+        // 4. GOOGLE ORQALI KIRISH
+        window.onload = function () {
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+                    callback: handleGoogleResponse
+                });
+            }
+        };
+
+        function handleGoogleResponse(response) {
+            try {
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const googleUser = JSON.parse(jsonPayload);
+                const email = googleUser.email;
+                const name = googleUser.name;
+
+                const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                let user = users.find(u => u.email === email);
+                
+                if (!user) {
+                    user = { name: name, email: email, password: 'GOOGLE_AUTH_USER' };
+                    users.push(user);
+                    localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                }
+
+                localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
+                loginError.textContent = "Google orqali muvaffaqiyatli kirildi!";
+                loginError.className = "login-error success is-visible";
+
+                setTimeout(() => {
+                    window.location.href = './home.html';
+                }, 1000);
+
+            } catch (error) {
+                loginError.textContent = "Google orqali kirishda xatolik yuz berdi!";
+                loginError.className = "login-error is-visible";
+            }
+        }
+
+        function triggerGoogleLogin() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        try {
+                            const client = google.accounts.oauth2.initTokenClient({
+                                client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+                                scope: 'email profile',
+                                callback: (tokenResponse) => {
+                                    if (tokenResponse && tokenResponse.access_token) {
+                                        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                                            headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
+                                        })
+                                        .then(res => res.json())
+                                        .then(googleUser => {
+                                            const email = googleUser.email;
+                                            const name = googleUser.name;
+
+                                            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                                            let user = users.find(u => u.email === email);
+                                            
+                                            if (!user) {
+                                                user = { name: name, email: email, password: 'GOOGLE_AUTH_USER' };
+                                                users.push(user);
+                                                localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                                            }
+
+                                            localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
+                                            loginError.textContent = "Google orqali muvaffaqiyatli kirildi!";
+                                            loginError.className = "login-error success is-visible";
+
+                                            setTimeout(() => {
+                                                window.location.href = './home.html';
+                                            }, 1000);
+                                        });
+                                    }
+                                }
+                            });
+                            client.requestAccessToken();
+                        } catch (err) {
+                            loginError.textContent = "Google oynasini ochib bo'lmadi.";
+                            loginError.className = "login-error is-visible";
+                        }
+                    }
+                });
+            } else {
+                loginError.textContent = "Google SDK yuklanmadi.";
+                loginError.className = "login-error is-visible";
+            }
+        }
+
+        document.getElementById('googleLoginBtn').addEventListener('click', triggerGoogleLogin);
+        document.getElementById('googleRegisterBtn').addEventListener('click', triggerGoogleLogin);
+    </script>
+</body>
+</html>

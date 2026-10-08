@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Ilyos AI API",
+      "type": "process",
+      "command": "node",
+      "args": ["server.cjs"],
+      "isBackground": true,
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^Ilyos server: http://127\\.0\\.0\\.1:5508/AI\\.html$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Ilyos server:",
+          "endsPattern": "^Ilyos server: http://127\\.0\\.0\\.1:5508/AI\\.html$"
+        }
+      }
+    }
+  ]
+}

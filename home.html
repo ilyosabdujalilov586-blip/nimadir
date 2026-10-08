@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ilyos | Bosh sahifa</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./cursor.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <style>
+    :root {
+      --header-height: 68px;
+      --bg: #070913;
+      --bg-surface: #0E1322;
+      --bg-surface-2: #161D32;
+      --ink: #F3F4F6;
+      --ink-muted: #94A3B8;
+      --accent-blue: #3B82F6;
+      --accent-purple: #8B5CF6;
+      --accent-violet: #A855F7;
+      --accent-pink: #EC4899;
+      --line: rgba(255, 255, 255, 0.1);
+      --line-glow: rgba(139, 92, 246, 0.4);
+      --panel: rgba(16, 21, 38, 0.78);
+      --panel-hover: rgba(24, 32, 56, 0.88);
+      --gradient-brand: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #D946EF 100%);
+      --gradient-brand-hover: linear-gradient(135deg, #60A5FA 0%, #A855F7 50%, #F0ABFC 100%);
+      --gradient-text: linear-gradient(135deg, #FFFFFF 0%, #60A5FA 30%, #C084FC 70%, #F472B6 100%);
+      --glow-shadow: 0 0 35px rgba(139, 92, 246, 0.28);
+      --card-radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background-color: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      min-height: 100vh;
+      position: relative;
+      overflow-x: clip;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.18), transparent 45%),
+        radial-gradient(circle at 85% 90%, rgba(139, 92, 246, 0.18), transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(217, 70, 239, 0.08), transparent 60%);
+      background-attachment: fixed;
+    }
+
+    h1, h2, h3, h4, nav, .brand, button, .tag, .mono, .num { font-family: 'Space Grotesk', sans-serif; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Header Bar */
+    header {
+      position: fixed;
+      inset: 0 0 auto;
+      width: 100%;
+      z-index: 40;
+      padding: 16px 36px;
+      background: rgba(7, 9, 19, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-mark {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background: var(--gradient-brand);
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .brand:hover .brand-mark {
+      transform: scale(1.08) rotate(4deg);
+      box-shadow: 0 6px 22px rgba(217, 70, 239, 0.55);
+    }
+    .brand-mark svg { width: 18px; height: 18px; color: #fff; }
+    .brand span {
+      background: linear-gradient(135deg, #FFFFFF 0%, #C084FC 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: block;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    nav a {
+      padding: 9px 18px;
+      border-radius: 100px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink);
+      opacity: 0.8;
+      border: 1px solid transparent;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    nav a:hover, nav a.active {
+      opacity: 1;
+      background: var(--panel);
+      border-color: var(--line-glow);
+      color: #C084FC;
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+    }
+    nav a[href="./AI.html"], nav a.ai-btn {
+      background: var(--gradient-brand);
+      color: #FFFFFF !important;
+      opacity: 1;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    nav a[href="./AI.html"]:hover, nav a.ai-btn:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 8px 25px rgba(217, 70, 239, 0.6);
+      background: var(--gradient-brand-hover);
+    }
+
+    /* Burger Button */
+    .burger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 42px;
+      height: 42px;
+      padding: 9px;
+      background: rgba(16, 21, 38, 0.85);
+      border: 1px solid var(--line-glow);
+      border-radius: 12px;
+      cursor: pointer;
+      z-index: 60;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .burger-btn:hover {
+      background: rgba(24, 32, 56, 0.95);
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.4);
+      border-color: rgba(192, 132, 252, 0.7);
+    }
+    .burger-btn span {
+      display: block;
+      width: 100%;
+      height: 2.5px;
+      background: #FFFFFF;
+      border-radius: 4px;
+      transition: transform 0.22s ease, opacity 0.18s ease, background 0.22s ease;
+    }
+    .burger-btn.is-active span:nth-child(1) {
+      transform: translate3d(0, 7px, 0) rotate(45deg);
+      background: #EC4899;
+    }
+    .burger-btn.is-active span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0.2);
+    }
+    .burger-btn.is-active span:nth-child(3) {
+      transform: translate3d(0, -7px, 0) rotate(-45deg);
+      background: #C084FC;
+    }
+
+    .menu-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 19, 0.42);
+      z-index: 30;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .menu-backdrop.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    main { max-width: 980px; margin: var(--header-height) auto 0; padding: 0 28px; }
+    section { padding: 80px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 92px; }
+    section:last-child { border-bottom: none; }
+    #home { scroll-margin-top: 92px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #C084FC;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      padding: 7px 18px;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin: 0 0 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 14px rgba(139, 92, 246, 0.2);
+      backdrop-filter: blur(8px);
+    }
+    .tag::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #EC4899;
+      box-shadow: 0 0 10px #EC4899;
+      display: inline-block;
+    }
+
+    .Ilyos-title {
+      text-align: center;
+      margin: 0 auto 22px;
+      max-width: 16ch;
+      background: var(--gradient-text);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: clamp(2.5rem, 6.5vw, 4rem);
+      line-height: 1.06;
+      letter-spacing: -0.035em;
+      font-weight: 800;
+      animation: gradientShift 6s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .lede {
+      font-size: 1.18rem;
+      line-height: 1.75;
+      max-width: 62ch;
+      opacity: 0.85;
+      margin: 0 auto 38px;
+      text-align: center;
+      color: #E2E8F0;
+    }
+
+    .btnrow { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 100px;
+      border: none;
+      background: var(--gradient-brand);
+      color: #FFFFFF;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.98rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(217, 70, 239, 0.6);
+      background: var(--gradient-brand-hover);
+    }
+    .btn.ghost {
+      background: var(--panel);
+      color: var(--ink);
+      border: 1px solid var(--line-glow);
+    }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 54px; }
+    .stat {
+      padding: 28px 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--card-radius);
+      text-align: center;
+      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.65s ease, box-shadow 0.65s ease;
+    }
+    .stat:hover, .row:hover, .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--line-glow);
+      box-shadow: 0 16px 36px rgba(139, 92, 246, 0.2);
+    }
+    .num { font-size: clamp(2.2rem, 4.5vw, 3rem); font-weight: 800; background: linear-gradient(135deg, #60A5FA 0%, #C084FC 50%, #F472B6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lbl { font-size: 0.92rem; opacity: 0.8; margin-top: 8px; color: #CBD5E1; }
+
+    .list { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+    .row {
+      display: flex; justify-content: space-between; gap: 24px; padding: 26px 32px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--card-radius); align-items: center;
+      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.65s ease, box-shadow 0.65s ease;
+    }
+    .txt h3 { margin: 0 0 6px; font-size: 1.2rem; font-weight: 700; color: #FFFFFF; }
+    .txt p { margin: 0; opacity: 0.82; font-size: 0.96rem; color: #CBD5E1; }
+    .mark { color: #FFFFFF; background: var(--gradient-brand); font-size: 0.9rem; font-weight: 800; padding: 8px 18px; border-radius: 100px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 14px; justify-content: center; }
+    .card { width: 100%; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--card-radius); padding: 28px; min-height: 220px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.65s ease, box-shadow 0.65s ease; }
+    .cat { font-size: 0.78rem; color: #C084FC; text-transform: uppercase; font-weight: 800; }
+    .card h3 { margin: 0; font-size: 1.15rem; color: #FFFFFF; }
+    .card p { margin: 0; opacity: 0.8; font-size: 0.94rem; color: #CBD5E1; }
+    .open { font-size: 0.88rem; font-weight: 700; color: #A855F7; }
+
+    .form-wrap { width: 100%; max-width: 620px; margin: 0 auto; background: var(--panel); border: 1px solid var(--line-glow); border-radius: 28px; padding: 36px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35); }
+    .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+    label { font-size: 0.9rem; font-weight: 700; color: #E2E8F0; }
+    input, textarea {
+      width: 100%; background: rgba(7, 9, 19, 0.75); border: 1px solid var(--line); padding: 14px 18px; border-radius: 14px; color: var(--ink); font-size: 0.98rem;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #8B5CF6; }
+    textarea { resize: vertical; min-height: 130px; }
+
+    .success-modal {
+      position: fixed; inset: 0; width: 100%; z-index: 70; display: flex; align-items: center; justify-content: center; padding: 16px;
+      background: rgba(7, 9, 19, 0.85); backdrop-filter: blur(16px); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease;
+    }
+    .success-modal.is-open { opacity: 1; visibility: visible; }
+    .success-dialog {
+      flex: 0 1 420px; padding: 40px 32px 32px; text-align: center; background: rgba(16, 21, 38, 0.95);
+      border: 1px solid var(--line-glow); border-radius: 28px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    }
+    .success-check { width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 50%; display: grid; place-items: center; background: var(--gradient-brand); color: #fff; font-size: 38px; }
+    .success-dialog h2 { margin: 0 0 12px; font-size: 1.55rem; color: #FFFFFF; }
+    .success-dialog p { margin: 0 0 26px; opacity: .82; color: #CBD5E1; }
+    .modal-close { padding: 12px 28px; border: 0; border-radius: 100px; background: var(--gradient-brand); color: #FFFFFF; font-weight: 700; cursor: pointer; }
+
+    .footer { max-width: 980px; margin: 0 auto; padding: 44px 28px 34px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: #CBD5E1; }
+
+    @keyframes menuItemReveal {
+      from { opacity: 0; transform: translateX(14px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --header-height: 70px;
+      }
+      header {
+        padding: 14px 24px;
+      }
+      .brand {
+        font-size: 1.18rem;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .stat:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+        width: calc(50% - 9px);
+        justify-self: center;
+      }
+
+      .burger-btn {
+        display: flex;
+        z-index: 60;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: min(340px, 88vw);
+        height: 100vh;
+        height: 100dvh;
+        overflow-y: auto;
+        background: #101526;
+        border-left: 1px solid var(--line-glow);
+        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.42);
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 90px 24px 32px 24px;
+        gap: 12px;
+        transform: translateX(100%);
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.35s;
+      }
+
+      .nav-links.is-active {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
+
+      .nav-links a {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 1rem;
+        border-radius: 14px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-links.is-active a {
+        animation: menuItemReveal 0.35s both;
+      }
+      .nav-links.is-active a:nth-child(2) { animation-delay: 0.04s; }
+      .nav-links.is-active a:nth-child(3) { animation-delay: 0.08s; }
+      .nav-links.is-active a:nth-child(4) { animation-delay: 0.12s; }
+      .nav-links.is-active a:nth-child(5) { animation-delay: 0.16s; }
+
+      .menu-backdrop {
+        background: rgba(7, 9, 19, 0.42);
+      }
+
+      main {
+        padding: 0 24px;
+      }
+      section {
+        padding: 64px 0;
+      }
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .card:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+        width: calc(50% - 8px);
+        justify-self: center;
+      }
+      .Ilyos-title {
+        font-size: clamp(2.25rem, 6vw, 3.5rem);
+      }
+      .lede {
+        font-size: 1.05rem;
+        margin-bottom: 32px;
+      }
+      .row {
+        padding: 22px 24px;
+      }
+      .card {
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      :root {
+        --header-height: 66px;
+      }
+      header {
+        padding: 12px 16px;
+      }
+      .brand {
+        font-size: 1.08rem;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+      }
+      main {
+        padding: 0 18px;
+      }
+      section {
+        padding: 52px 0;
+      }
+      .Ilyos-title {
+        font-size: clamp(2rem, 9vw, 2.8rem);
+      }
+      .lede {
+        font-size: 0.98rem;
+        margin-bottom: 26px;
+      }
+      .btnrow {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btnrow .btn {
+        width: 100%;
+      }
+      .stats, .grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 34px;
+      }
+      .stat:last-child:nth-child(odd), .card:last-child:nth-child(odd) {
+        grid-column: auto;
+        width: 100%;
+      }
+      .row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        gap: 12px;
+      }
+      .form-wrap {
+        padding: 22px 18px;
+        border-radius: 20px;
+      }
+      .form-wrap .btn {
+        width: 100%;
+      }
+      .footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        padding: 30px 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+  <header data-aos="fade-down" data-aos-duration="700">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      </div>
+      <span id="brandAccountName">Ilyos</span>
+    </div>
+    <nav class="nav-links" id="navLinks" aria-label="Asosiy navigatsiya">
+      <a class="active" href="#home">Bosh sahifa</a>
+      <a href="#services">Xizmatlar</a>
+      <a href="#library">Kutubxona</a>
+      <a href="#contact">Aloqa</a>
+      <a class="ai-btn" href="./AI.html"> AI rejimi</a>
+    </nav>
+    <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menyuni ochish" aria-controls="navLinks" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+
+  <main id="home">
+    <section data-aos="fade-up">
+      <div style="text-align: center;">
+        <div class="tag" data-aos="fade-up">Ilyos Web Platform</div>
+      </div>
+      <h1 class="Ilyos-title" data-aos="zoom-in" data-aos-delay="100">Ilyos Web Application</h1>
+      <p class="lede" data-aos="fade-up" data-aos-delay="170">G'oyadan ishlab turgan yechimgacha bo'lgan yo'lni qisqartiradigan shaxsiy platforma.</p>
+      <div class="btnrow" data-aos="fade-up" data-aos-delay="230">
+        <a class="btn" href="#services">Xizmatlarni ko'rish</a>
+        <a class="btn ghost" href="#library">Kutubxonaga o'tish</a>
+      </div>
+      <div class="stats" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat"><div class="num">40+</div><div class="lbl">bajarilgan loyiha</div></div>
+        <div class="stat"><div class="num">4</div><div class="lbl">asosiy xizmat yo'nalishi</div></div>
+        <div class="stat"><div class="num">10+</div><div class="lbl">kutubxonadagi qo'llanma</div></div>
+      </div>
+    </section>
+
+    <section id="services">
+      <p class="tag">Xizmatlar</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">To'liq xizmatlar ro'yxati</h2>
+      <div class="list">
+        <div class="row"><div class="txt"><h3>Maslahat berish</h3><p>Loyihangiz uchun zamonaviy yechimlar.</p></div><div class="mark">01</div></div>
+        <div class="row"><div class="txt"><h3>Modullarni sozlash</h3><p>Funksiyalarni aniq vazifangizga moslash.</p></div><div class="mark">02</div></div>
+        <div class="row"><div class="txt"><h3>Integratsiya</h3><p>Dasturiy yechimlarni ulash.</p></div><div class="mark">03</div></div>
+        <div class="row"><div class="txt"><h3>Texnik qo'llab-quvvatlash</h3><p>Optimallashtirish va xavfsizlik.</p></div><div class="mark">04</div></div>
+      </div>
+    </section>
+
+    <section id="library">
+      <p class="tag">Kutubxona</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">O'qish uchun materiallar</h2>
+      <div class="grid">
+        <div class="card"><span class="cat">Qo'llanma</span><h3>Web dasturlashga kirish</h3><p>Frontend va backend asoslari.</p><span class="open">Batafsil →</span></div>
+        <div class="card"><span class="cat">To'plam</span><h3>Amaliy holatlar to'plami</h3><p>Real misollar va keyslar.</p><span class="open">Batafsil →</span></div>
+        <div class="card"><span class="cat">Qo'llanma</span><h3>UI/UX tamoyillari</h3><p>Foydalanuvchi tajribasini yaxshilash.</p><span class="open">Batafsil →</span></div>
+      </div>
+    </section>
+
+    <!-- ALOQA QISMI -->
+    <section id="contact">
+      <p class="tag">Bog'lanish</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">Biz bilan aloqa</h2>
+      <p class="lede" style="text-align:left; max-width:58ch; margin:0 0 32px;">Savollaringiz bormi yoki yangi loyiha boshlamoqchimisiz? Bizga yozing.</p>
+      <div class="form-wrap">
+        <div class="field">
+          <label for="contactName">Ismingiz</label>
+          <input id="contactName" type="text" placeholder="Ismingizni kiriting..." />
+        </div>
+        <div class="field">
+          <label for="contactMsg">Xabaringiz</label>
+          <textarea id="contactMsg" placeholder="Xabaringizni yozing..."></textarea>
+        </div>
+        <button class="btn" id="sendContact" type="button">Xabarni yuborish</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <div>Ilyos — raqamli yechimlar.</div>
+    <div>© 2026 Ilyos</div>
+  </div>
+
+  <div class="success-modal" id="successModal">
+    <div class="success-dialog">
+      <div class="success-check">✓</div>
+      <h2>Xabar yuborildi</h2>
+      <p>Rahmat! Xabaringiz Telegram botga yuborildi.</p>
+      <button class="modal-close" id="closeModal" type="button">Yopish</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    if (window.AOS) {
+      AOS.init({ once: true, duration: 1100, easing: 'ease-out-cubic' });
+    }
+
+    // Hamburgerni bosganda menyu o'ng tomondan chiqishi
+    const burgerBtn = document.getElementById('burgerBtn');
+    const navLinks = document.getElementById('navLinks');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+
+    function toggleMenu() {
+      const isOpen = burgerBtn.classList.toggle('is-active');
+      navLinks.classList.toggle('is-active', isOpen);
+      menuBackdrop.classList.toggle('is-active', isOpen);
+      burgerBtn.setAttribute('aria-expanded', String(isOpen));
+      burgerBtn.setAttribute('aria-label', isOpen ? 'Menyuni yopish' : 'Menyuni ochish');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
+    function closeMenu() {
+      if (burgerBtn) burgerBtn.classList.remove('is-active');
+      if (navLinks) navLinks.classList.remove('is-active');
+      if (menuBackdrop) menuBackdrop.classList.remove('is-active');
+      if (burgerBtn) {
+        burgerBtn.setAttribute('aria-expanded', 'false');
+        burgerBtn.setAttribute('aria-label', 'Menyuni ochish');
+      }
+      document.body.style.overflow = '';
+    }
+
+    if (burgerBtn) burgerBtn.addEventListener('click', toggleMenu);
+    if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+
+    if (navLinks) {
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          closeMenu();
+          navLinks.querySelectorAll('a').forEach(navLink => navLink.classList.remove('active'));
+          link.classList.add('active');
+        });
+      });
+    }
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && navLinks.classList.contains('is-active')) closeMenu();
+    });
+
+    // Tizimga kirgan foydalanuvchi ismini chiqarish
+    try {
+      const activeUser = JSON.parse(localStorage.getItem('ilyosActiveUser') || 'null');
+      if (activeUser && activeUser.name) {
+        const brandNameEl = document.getElementById('brandAccountName');
+        if (brandNameEl) brandNameEl.textContent = activeUser.name;
+      }
+    } catch(e) {}
+
+    const contactName = document.getElementById('contactName');
+    const contactMsg = document.getElementById('contactMsg');
+    const sendContact = document.getElementById('sendContact');
+    const successModal = document.getElementById('successModal');
+    const closeModal = document.getElementById('closeModal');
+
+    function hideSuccessModal() {
+      successModal.classList.remove('is-open');
+    }
+
+    // TO'G'RIDAN-TO'G'RI TELEGRAM API BILAN ISHLOVCHI KOD (PHP KERAK EMAS)
+    sendContact.addEventListener('click', async () => {
+      const name = contactName.value.trim();
+      const message = contactMsg.value.trim();
+
+      if (!name) {
+        contactName.focus();
+        return;
+      }
+      if (!message) {
+        contactMsg.focus();
+        return;
+      }
+
+      sendContact.disabled = true;
+      sendContact.textContent = "Yuborilmoqda...";
+
+      // Sizning token va chat ID shu yerga qo'yildi
+      const token = "8831562668:AAEM5PvV0QY6dJl12w0pAmR27u-z_v4EN9w";
+      const chatId = "8781391205";
+
+      const text = `📩 *Yangi xabar (Ilyos Web)*\n\n👤 *Ismi:* ${name}\n💬 *Xabari:* ${message}`;
+
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: text,
+            parse_mode: 'Markdown'
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          successModal.classList.add('is-open');
+          contactName.value = '';
+          contactMsg.value = '';
+          closeModal.focus();
+        } else {
+          alert("Xatolik: Botga Start bosganingizga amin bo'ling!");
+        }
+      } catch (error) {
+        alert("Internet aloqasida xatolik yuz berdi.");
+      } finally {
+        sendContact.disabled = false;
+        sendContact.textContent = "Xabarni yuborish";
+      }
+    });
+
+    closeModal.addEventListener('click', hideSuccessModal);
+    successModal.addEventListener('click', event => {
+      if (event.target === successModal) hideSuccessModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') hideSuccessModal();
+    });
+  </script>
+  <script src="./cursor.js"></script>
+</body>
+</html> 
