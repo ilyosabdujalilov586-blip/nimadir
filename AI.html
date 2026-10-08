@@ -664,20 +664,22 @@
     <button class="menu-toggle" id="menuToggle" type="button" aria-label="Menyuni ochish" aria-controls="sidebar" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
-    <div class="mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    <div class="mark" style="display: flex; align-items: center; gap: 8px; margin-right: auto;">
+      <img src="favicon.svg" alt="Ilyos AI Logo" style="width: 28px; height: 28px;">
+      <div class="headline" style="display: flex; flex-direction: column; align-items: flex-start; margin: 0;">
+        <h1 style="font-size: 20px; margin: 0;">Ilyos AI</h1>
+        <div class="status" style="margin: 0;"><span class="dot" id="statusDot"></span><span id="statusText">Ulanmoqda...</span></div>
+      </div>
     </div>
-    <div class="headline">
-      <h1>Ilyos</h1>
-      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Ulanmoqda...</span></div>
+    
+    <div class="profile-section" style="display: flex; align-items: center; gap: 12px;">
+      <!-- Profile badge shown when logged in -->
+      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili" style="display: flex; align-items: center; gap: 8px; background: rgba(139, 92, 246, 0.15); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">
+        <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" style="width: 28px; height: 28px; border-radius: 50%;">
+        <span class="account-name" id="accountName" style="font-size: 14px; font-weight: 500;">Profil</span>
+      </div>
+      <button type="button" class="back-home" onclick="window.location.href='./home.html'">Chiqish</button>
     </div>
-    <div class="top-links"></div>
-    <div class="account-badge" id="accountBadge" hidden aria-label="Google akkaunti">
-      <img class="account-avatar" id="accountAvatar" alt="" hidden>
-      <span class="account-avatar" id="accountInitials" aria-hidden="true"></span>
-      <span class="account-name" id="accountName"></span>
-    </div>
-    <button type="button" class="back-home" onclick="window.location.href='./home.html'">Bosh sahifaga qaytish</button>
   </header>
 
   <main id="chat" data-aos="fade-up">
