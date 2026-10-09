@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ilyos | Kirish va Ro'yxatdan o'tish</title>
+    <title data-i18n="auth.pageTitle">Ilyos | Kirish va Ro'yxatdan o'tish</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="./cursor.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -228,6 +228,26 @@
             overflow: hidden;
         }
 
+        .auth-language {
+            position: fixed;
+            z-index: 10001;
+            top: 18px;
+            right: 18px;
+            min-width: 112px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 9px 12px;
+            background: rgba(16, 21, 36, .96);
+            color: var(--text);
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .auth-language option {
+            background: #101524;
+            color: #fff;
+        }
+
         .connection-screen {
             position: fixed;
             z-index: 10000;
@@ -357,6 +377,10 @@
         }
 
         @media (max-width: 520px) {
+            .auth-language {
+                top: 12px;
+                right: 12px;
+            }
             .parent {
                 padding: 16px 12px;
             }
@@ -414,13 +438,19 @@
 
     <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
+    <select class="auth-language" id="languageSelect" aria-label="Til">
+        <option value="uz">O‘zbekcha</option>
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+    </select>
+
     <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
         <div class="connection-content">
             <div class="connection-spinner" id="connectionSpinner" aria-hidden="true">
                 <span class="connection-logo">ILYOS.AI</span>
             </div>
-            <p class="connection-message" id="connectionMessage" hidden>Internet ishlamadi. Ulanishni tekshirib, qayta urinib ko'ring.</p>
-            <button class="connection-retry" id="connectionRetry" type="button" hidden>Qayta tekshirish</button>
+            <p class="connection-message" id="connectionMessage" data-i18n="auth.offline" hidden>Internet ishlamadi. Ulanishni tekshirib, qayta urinib ko'ring.</p>
+            <button class="connection-retry" id="connectionRetry" type="button" data-i18n="auth.retry" hidden>Qayta tekshirish</button>
         </div>
     </div>
 
@@ -431,55 +461,55 @@
                     
                     <!-- Tablar -->
                     <div class="auth-tabs" id="authTabsContainer">
-                        <button class="auth-tab active" id="tabLogin">Kirish</button>
-                        <button class="auth-tab" id="tabRegister">Ro'yxatdan o'tish</button>
+                        <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
+                        <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
                     </div>
 
-                    <h1 class="sing-up-title" id="formTitle">Tizimga kirish</h1>
+                    <h1 class="sing-up-title" id="formTitle" data-i18n="auth.loginTitle">Tizimga kirish</h1>
 
                     <!-- Kirish Formasi -->
                     <form id="loginForm" class="active-form">
-                        <label class="email-title" for="emailInput">Email</label>
-                        <input id="emailInput" class="email-input" type="email" placeholder="Email kiriting" required>
+                        <label class="email-title" for="emailInput" data-i18n="auth.email">Email</label>
+                        <input id="emailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
                     
-                        <label class="password-title" for="passwordInput">Parol</label>
-                        <input id="passwordInput" class="password-input" type="password" placeholder="Parol kiriting" required>
+                        <label class="password-title" for="passwordInput" data-i18n="auth.password">Parol</label>
+                        <input id="passwordInput" class="password-input" type="password" placeholder="Parol kiriting" data-i18n-placeholder="auth.passwordPlaceholder" required>
                     
-                        <button class="sing-up-link" type="submit">Kirish</button>
+                        <button class="sing-up-link" type="submit" data-i18n="auth.login">Kirish</button>
 
-                        <div class="google-divider">yoki</div>
+                        <div class="google-divider" data-i18n="auth.or">yoki</div>
                         <button type="button" class="google-btn" id="googleLoginBtn">
                             <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                            Google orqali kirish
+                            <span data-i18n="auth.googleLogin">Google orqali kirish</span>
                         </button>
                     </form>
 
                     <!-- Ro'yxatdan o'tish Formasi -->
                     <form id="registerForm">
-                        <label class="name-title" for="nameInput">Ism</label>
-                        <input id="nameInput" class="name-input" type="text" placeholder="Ismingizni kiriting" required>
+                        <label class="name-title" for="nameInput" data-i18n="auth.name">Ism</label>
+                        <input id="nameInput" class="name-input" type="text" placeholder="Ismingizni kiriting" data-i18n-placeholder="auth.namePlaceholder" required>
 
-                        <label class="email-title" for="regEmailInput">Email</label>
-                        <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" required>
+                        <label class="email-title" for="regEmailInput" data-i18n="auth.email">Email</label>
+                        <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
                     
-                        <label class="password-title" for="regPasswordInput">Parol</label>
-                        <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" required>
+                        <label class="password-title" for="regPasswordInput" data-i18n="auth.password">Parol</label>
+                        <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
                     
-                        <button class="sing-up-link" type="submit">Ro'yxatdan o'tish</button>
+                        <button class="sing-up-link" type="submit" data-i18n="auth.register">Ro'yxatdan o'tish</button>
 
-                        <div class="google-divider">yoki</div>
+                        <div class="google-divider" data-i18n="auth.or">yoki</div>
                         <button type="button" class="google-btn" id="googleRegisterBtn">
                             <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                            Google orqali ro'yxatdan o'tish
+                            <span data-i18n="auth.googleRegister">Google orqali ro'yxatdan o'tish</span>
                         </button>
                     </form>
 
                     <!-- Kodni tasdiqlash Formasi -->
                     <form id="verifyForm">
-                        <label class="name-title" for="verifyCodeInput">Tasdiqlash kodi</label>
-                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;">Ekranga chiqqan 4 xonali kodni kiriting:</p>
-                        <input id="verifyCodeInput" class="name-input" type="text" placeholder="Kodni kiriting" maxlength="4" required>
-                        <button class="sing-up-link" type="submit">Kodni tasdiqlash</button>
+                        <label class="name-title" for="verifyCodeInput" data-i18n="auth.verifyCode">Tasdiqlash kodi</label>
+                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Ekranga chiqqan 4 xonali kodni kiriting:</p>
+                        <input id="verifyCodeInput" class="name-input" type="text" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="4" required>
+                        <button class="sing-up-link" type="submit" data-i18n="auth.confirmCode">Kodni tasdiqlash</button>
                     </form>
 
                     <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
@@ -490,6 +520,7 @@
     </main>
 
     <script src="./cursor.js"></script>
+    <script src="./language.js"></script>
     <script>
         (() => {
             const screen = document.getElementById('connectionScreen');
@@ -565,6 +596,35 @@
 
         let pendingUserData = null;
         let generatedCode = null;
+        let activeAuthMessage = null;
+
+        function updateAuthTitle() {
+            const titleKey = verifyForm.classList.contains('active-form')
+                ? 'auth.verifyTitle'
+                : registerForm.classList.contains('active-form')
+                    ? 'auth.registerTitle'
+                    : 'auth.loginTitle';
+            formTitle.textContent = ilyosT(titleKey);
+        }
+
+        function setAuthMessage(key, success = false, values = {}) {
+            activeAuthMessage = { key, success, values };
+            loginError.textContent = ilyosT(key).replace('{code}', values.code || '');
+            loginError.className = `login-error${success ? ' success' : ''} is-visible`;
+        }
+
+        function clearAuthMessage() {
+            activeAuthMessage = null;
+            loginError.textContent = '';
+            loginError.className = 'login-error';
+        }
+
+        window.addEventListener('ilyoslanguagechange', () => {
+            updateAuthTitle();
+            if (activeAuthMessage) {
+                setAuthMessage(activeAuthMessage.key, activeAuthMessage.success, activeAuthMessage.values);
+            }
+        });
 
         tabLogin.addEventListener('click', () => {
             tabLogin.classList.add('active');
@@ -572,8 +632,8 @@
             loginForm.classList.add('active-form');
             registerForm.classList.remove('active-form');
             verifyForm.classList.remove('active-form');
-            formTitle.textContent = "Tizimga kirish";
-            loginError.textContent = "";
+            updateAuthTitle();
+            clearAuthMessage();
         });
 
         tabRegister.addEventListener('click', () => {
@@ -582,8 +642,8 @@
             registerForm.classList.add('active-form');
             loginForm.classList.remove('active-form');
             verifyForm.classList.remove('active-form');
-            formTitle.textContent = "Ro'yxatdan o'tish";
-            loginError.textContent = "";
+            updateAuthTitle();
+            clearAuthMessage();
         });
 
         function isValidEmail(email) {
@@ -594,14 +654,13 @@
         // 1. KIRISH QISMI
         loginForm.addEventListener('submit', event => {
             event.preventDefault();
-            loginError.classList.remove('is-visible');
+            clearAuthMessage();
 
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value;
 
             if (!isValidEmail(email)) {
-                loginError.textContent = "Iltimos, to'g'ri email manzilini kiriting!";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.emailInvalid');
                 return;
             }
 
@@ -609,20 +668,17 @@
             const foundUser = users.find(u => u.email === email);
 
             if (!foundUser) {
-                loginError.textContent = "Bunday akaunt mavjud emas!";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.noAccount');
                 return;
             }
 
             if (foundUser.password !== password) {
-                loginError.textContent = "Parol noto'g'ri! Iltimos, qaytadan urinib ko'ring.";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.badPassword');
                 return;
             }
 
             localStorage.setItem('ilyosActiveUser', JSON.stringify(foundUser));
-            loginError.textContent = "Parol to'g'ri! Tizimga muvaffaqiyatli kirdingiz.";
-            loginError.className = "login-error success is-visible";
+            setAuthMessage('auth.loginSuccess', true);
 
             setTimeout(() => {
                 window.location.href = './home.html';
@@ -632,22 +688,20 @@
         // 2. RO'YXATDAN O'TISH & SMS/ALERT ORQALI KOD CHIQARISH
         registerForm.addEventListener('submit', event => {
             event.preventDefault();
-            loginError.classList.remove('is-visible');
+            clearAuthMessage();
 
             const name = document.getElementById('nameInput').value.trim();
             const email = document.getElementById('regEmailInput').value.trim();
             const password = document.getElementById('regPasswordInput').value;
 
             if (!isValidEmail(email)) {
-                loginError.textContent = "Xato email! Haqiqiy email kiriting.";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.registerEmailInvalid');
                 return;
             }
 
             const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
             if (users.some(u => u.email === email)) {
-                loginError.textContent = "Bu email allaqachon ro'yxatdan o'tgan!";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.duplicateEmail');
                 return;
             }
 
@@ -656,14 +710,13 @@
             pendingUserData = { name, email, password };
 
             // Kodni alert oynasida va pastdagi xabarda ko'rsatamiz
-            alert("loctasdiqlash kodingiz: " + generatedCode);
+            alert(ilyosT('auth.codeAlert') + generatedCode);
 
             registerForm.classList.remove('active-form');
             verifyForm.classList.add('active-form');
             authTabsContainer.style.display = 'none';
-            formTitle.textContent = "Kodni tasdiqlash";
-            loginError.textContent = "Tasdiqlash kodi ekranga chiqarildi: " + generatedCode;
-            loginError.className = "login-error success is-visible";
+            updateAuthTitle();
+            setAuthMessage('auth.codeDisplayed', true, { code: generatedCode });
         });
 
         // 3. KODNI TASDIQLASH VA SAQLASH
@@ -677,15 +730,13 @@
                 localStorage.setItem('ilyosUsers', JSON.stringify(users));
                 localStorage.setItem('ilyosActiveUser', JSON.stringify(pendingUserData));
 
-                loginError.textContent = "Muvaffaqiyatli ro'yxatdan o'tdingiz!";
-                loginError.className = "login-error success is-visible";
+                setAuthMessage('auth.registerSuccess', true);
 
                 setTimeout(() => {
                     window.location.href = './home.html';
                 }, 1000);
             } else {
-                loginError.textContent = "Kiritilgan kod noto'g'ri!";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.codeInvalid');
             }
         });
 
@@ -723,16 +774,14 @@
                 }
 
                 localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
-                loginError.textContent = "Google orqali muvaffaqiyatli kirildi!";
-                loginError.className = "login-error success is-visible";
+                setAuthMessage('auth.googleSuccess', true);
 
                 setTimeout(() => {
                     window.location.href = './home.html';
                 }, 1000);
 
             } catch (error) {
-                loginError.textContent = "Google orqali kirishda xatolik yuz berdi!";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.googleError');
             }
         }
 
@@ -764,8 +813,7 @@
                                             }
 
                                             localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
-                                            loginError.textContent = "Google orqali muvaffaqiyatli kirildi!";
-                                            loginError.className = "login-error success is-visible";
+                                            setAuthMessage('auth.googleSuccess', true);
 
                                             setTimeout(() => {
                                                 window.location.href = './home.html';
@@ -776,14 +824,12 @@
                             });
                             client.requestAccessToken();
                         } catch (err) {
-                            loginError.textContent = "Google oynasini ochib bo'lmadi.";
-                            loginError.className = "login-error is-visible";
+                            setAuthMessage('auth.googleOpenError');
                         }
                     }
                 });
             } else {
-                loginError.textContent = "Google SDK yuklanmadi.";
-                loginError.className = "login-error is-visible";
+                setAuthMessage('auth.sdkError');
             }
         }
 
