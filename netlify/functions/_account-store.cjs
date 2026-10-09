@@ -28,14 +28,29 @@ function getChats() {
   return getStoreForSite('ilyos-chats');
 }
 
-function getSessionSecret() {
+async function getSessionSecret() {
   const secret = process.env.AUTH_SESSION_SECRET;
-  if (!secret || Buffer.byteLength(secret, 'utf8') < 32) {
-    const error = new Error('AUTH_SESSION_SECRET must contain at least 32 bytes.');
-    error.code = 'auth_not_configured';
-    throw error;
+  if (secret) {
+    if (Buffer.byteLength(secret, 'utf8') < 32) {
+      const error = new Error('AUTH_SESSION_SECRET must contain at least 32 bytes.');
+      error.code = 'auth_not_configured';
+      throw error;
+    }
+    return secret;
   }
-  return secret;
+
+  const accounts = getAccounts();
+  const key = 'config/session-hmac-secret';
+  const existingSecret = await accounts.get(key);
+  if (existingSecret) return existingSecret;
+
+  const generatedSecret = randomBytes(32).toString('base64url');
+  const result = await accounts.set(key, generatedSecret, { onlyIfNew: true });
+  if (result.modified) return generatedSecret;
+
+  const createdSecret = await accounts.get(key);
+  if (createdSecret) return createdSecret;
+  throw new Error('Could not initialize the account session secret.');
 }
 
 function normalizeEmail(email) {
@@ -69,16 +84,16 @@ async function verifyPassword(password, user) {
   return expected.length === received.length && timingSafeEqual(expected, received);
 }
 
-function signSession(email, now = Date.now()) {
+async function signSession(email, now = Date.now()) {
   const payload = Buffer.from(JSON.stringify({
     email,
     expiresAt: Math.floor(now / 1000) + SESSION_MAX_AGE
   })).toString('base64url');
-  const signature = createHmac('sha256', getSessionSecret()).update(payload).digest('base64url');
+  const signature = createHmac('sha256', await getSessionSecret()).update(payload).digest('base64url');
   return `${payload}.${signature}`;
 }
 
-function readSession(event, now = Date.now()) {
+async function readSession(event, now = Date.now()) {
   const cookieHeader = event.headers?.cookie || event.headers?.Cookie || '';
   const token = cookieHeader.split(';').map(part => part.trim())
     .find(part => part.startsWith(`${SESSION_COOKIE}=`))
@@ -96,13 +111,7 @@ function readSession(event, now = Date.now()) {
   const email = normalizeEmail(session?.email);
   if (!email || !Number.isSafeInteger(session.expiresAt) || session.expiresAt <= Math.floor(now / 1000)) return null;
 
-  let expected;
-  try {
-    expected = createHmac('sha256', getSessionSecret()).update(payload).digest();
-  } catch (error) {
-    if (error.code === 'auth_not_configured') throw error;
-    return null;
-  }
+  const expected = createHmac('sha256', await getSessionSecret()).update(payload).digest();
   const received = Buffer.from(signature, 'base64url');
   return received.length === expected.length && timingSafeEqual(expected, received) ? { email } : null;
 }
