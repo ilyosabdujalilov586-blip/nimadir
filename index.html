@@ -664,6 +664,34 @@
             loginError.className = 'login-error';
         }
 
+        function showCodeNotification(code) {
+            if (!('Notification' in window)) return;
+
+            const notify = () => {
+                try {
+                    new Notification('ILYOS AI', {
+                        body: ilyosT('auth.codeAlert') + code,
+                        icon: './favicon.svg',
+                        tag: 'ilyos-verification-code'
+                    });
+                } catch (error) {
+                    console.error('Tasdiqlash kodi bildirishnomasini ko\'rsatib bo\'lmadi:', error);
+                }
+            };
+
+            if (Notification.permission === 'granted') {
+                notify();
+            } else if (Notification.permission === 'default') {
+                Notification.requestPermission()
+                    .then(permission => {
+                        if (permission === 'granted') notify();
+                    })
+                    .catch(error => {
+                        console.error('Bildirishnoma ruxsatini so\'rashda xatolik:', error);
+                    });
+            }
+        }
+
         window.addEventListener('ilyoslanguagechange', () => {
             updateAuthTitle();
             if (activeAuthMessage) {
@@ -730,7 +758,7 @@
             }, 1000);
         });
 
-        // 2. RO'YXATDAN O'TISH & SMS/ALERT ORQALI KOD CHIQARISH
+        // 2. RO'YXATDAN O'TISH VA TASDIQLASH KODINI KO'RSATISH
         registerForm.addEventListener('submit', event => {
             event.preventDefault();
             clearAuthMessage();
@@ -754,8 +782,7 @@
             generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
             pendingUserData = { name, email, password };
 
-            // Kodni alert oynasida va pastdagi xabarda ko'rsatamiz
-            alert(ilyosT('auth.codeAlert') + generatedCode);
+            showCodeNotification(generatedCode);
 
             registerForm.classList.remove('active-form');
             verifyForm.classList.add('active-form');
