@@ -566,6 +566,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
     }
     .profile-offcanvas.open {
       transform: translateX(0);
@@ -599,6 +600,24 @@
       height: 80px;
       border-radius: 50%;
       border: 2px solid var(--line-glow);
+    }
+    .logout-btn {
+      width: 100%;
+      margin-top: auto;
+      border: 1px solid rgba(248, 113, 113, .35);
+      border-radius: 14px;
+      padding: 13px 16px;
+      background: rgba(239, 68, 68, .1);
+      color: #fca5a5;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(248, 113, 113, .7);
+      background: rgba(239, 68, 68, .18);
     }
     .account-badge {
       display: flex;
@@ -672,6 +691,7 @@
       <h3 style="margin: 0; font-size: 20px;" id="offcanvasName" data-i18n="profile.user">Foydalanuvchi</h3>
       <p style="margin: 0; color: var(--ink-muted); font-size: 14px;" id="offcanvasEmail">user@example.com</p>
     </div>
+    <button class="logout-btn" id="logoutBtn" type="button" data-i18n="profile.logout">Akkauntdan chiqish</button>
   </div>
 
   <main id="home">
@@ -786,6 +806,7 @@
     const profileOffcanvas = document.getElementById('profileOffcanvas');
     const closeOffcanvasBtn = document.getElementById('closeOffcanvasBtn');
     const accountBadge = document.getElementById('accountBadge');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     function openOffcanvas() {
       profileOffcanvas.classList.add('open');
@@ -801,6 +822,12 @@
 
     if (accountBadge) accountBadge.addEventListener('click', openOffcanvas);
     if (closeOffcanvasBtn) closeOffcanvasBtn.addEventListener('click', closeOffcanvas);
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('ilyosActiveUser');
+        window.location.href = './index.html';
+      });
+    }
 
     if (menuBackdrop) {
       menuBackdrop.addEventListener('click', () => {
