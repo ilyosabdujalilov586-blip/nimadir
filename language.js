@@ -1,0 +1,310 @@
+(() => {
+  const translations = {
+    uz: {
+      'language.label': 'Til',
+      'page.homeTitle': 'Ilyos | Bosh sahifa',
+      'page.chatTitle': 'Ilyos — AI yordamchi',
+      'nav.mainAria': 'Asosiy navigatsiya',
+      'nav.home': 'Bosh sahifa',
+      'nav.services': 'Xizmatlar',
+      'nav.library': 'Kutubxona',
+      'nav.contact': 'Aloqa',
+      'nav.ai': 'AI rejimi',
+      'nav.profile': 'Profil',
+      'nav.profileAria': 'Foydalanuvchi profili',
+      'nav.menuOpen': 'Menyuni ochish',
+      'nav.menuClose': 'Menyuni yopish',
+      'profile.imageAlt': 'Profil rasmi',
+      'profile.details': "Profil Ma'lumotlari",
+      'profile.close': 'Yopish',
+      'profile.user': 'Foydalanuvchi',
+      'hero.tag': 'Ilyos Web Platform',
+      'hero.title': 'Ilyos Web Application',
+      'hero.lede': "G'oyadan ishlab turgan yechimgacha bo'lgan yo'lni qisqartiradigan shaxsiy platforma.",
+      'hero.viewServices': "Xizmatlarni ko'rish",
+      'hero.toLibrary': "Kutubxonaga o'tish",
+      'stats.projects': 'bajarilgan loyiha',
+      'stats.services': "asosiy xizmat yo'nalishi",
+      'stats.guides': "kutubxonadagi qo'llanma",
+      'services.title': 'To‘liq xizmatlar ro‘yxati',
+      'services.consulting': 'Maslahat berish',
+      'services.consultingText': 'Loyihangiz uchun zamonaviy yechimlar.',
+      'services.modules': 'Modullarni sozlash',
+      'services.modulesText': 'Funksiyalarni aniq vazifangizga moslash.',
+      'services.integration': 'Integratsiya',
+      'services.integrationText': 'Dasturiy yechimlarni ulash.',
+      'services.support': 'Texnik qo‘llab-quvvatlash',
+      'services.supportText': 'Optimallashtirish va xavfsizlik.',
+      'library.title': 'O‘qish uchun materiallar',
+      'library.guide': 'Qo‘llanma',
+      'library.collection': 'To‘plam',
+      'library.webTitle': 'Web dasturlashga kirish',
+      'library.webText': 'Frontend va backend asoslari.',
+      'library.caseTitle': 'Amaliy holatlar to‘plami',
+      'library.caseText': 'Real misollar va keyslar.',
+      'library.uiTitle': 'UI/UX tamoyillari',
+      'library.uiText': 'Foydalanuvchi tajribasini yaxshilash.',
+      'library.more': 'Batafsil →',
+      'contact.tag': 'Bog‘lanish',
+      'contact.title': 'Biz bilan aloqa',
+      'contact.lede': 'Savollaringiz bormi yoki yangi loyiha boshlamoqchimisiz? Bizga yozing.',
+      'contact.name': 'Ismingiz',
+      'contact.namePlaceholder': 'Ismingizni kiriting...',
+      'contact.message': 'Xabaringiz',
+      'contact.messagePlaceholder': 'Xabaringizni yozing...',
+      'contact.send': 'Xabarni yuborish',
+      'contact.sending': 'Yuborilmoqda...',
+      'contact.sent': 'Xabar yuborildi',
+      'contact.thanks': 'Rahmat! Xabaringiz Telegram botga yuborildi.',
+      'contact.close': 'Yopish',
+      'contact.startBot': "Xatolik: Botga Start bosganingizga amin bo'ling!",
+      'contact.networkError': 'Internet aloqasida xatolik yuz berdi.',
+      'footer.tagline': 'Ilyos — raqamli yechimlar.',
+      'chat.new': 'Yangi chat',
+      'chat.secure': 'ILYOS AI server orqali xavfsiz ulanadi.',
+      'chat.menuOpen': 'Menyuni ochish',
+      'chat.menuClose': 'Menyuni yopish',
+      'chat.statusConnecting': 'Gemini bilan ulanmoqda...',
+      'chat.statusOnline': 'Ilyos AI — onlayn',
+      'chat.statusError': 'AI serveriga ulanib bo‘lmadi',
+      'chat.backHome': 'Bosh sahifaga qaytish',
+      'chat.welcome': 'Assalomu alaykum! Ilyos AI eshitadi.',
+      'chat.input': 'Xabaringizni yozing...',
+      'chat.send': 'Yuborish',
+      'chat.disclaimer': 'Ilyos AI xatoliklarga yo‘l qo‘yishi mumkin. Muhim masalalarda tekshirib ko‘ring.',
+      'chat.user': 'Siz',
+      'chat.delete': 'Ochiq chatni o‘chirish',
+      'chat.deleteConfirm': 'Ochiq chatni o‘chirishni xohlaysizmi? Bu amalni ortga qaytarib bo‘lmaydi.',
+      'chat.storageError': 'Chat tarixini brauzerda saqlab bo‘lmadi. Brauzer xotirasida joy borligini tekshiring.',
+      'chat.serverNotReady': 'Gemini serveri tayyor emas.',
+      'chat.localError': 'AI serveriga ulanib bo‘lmadi. VS Code oynaoy holati va Netlify Functions sozlamalarini tekshiring.',
+      'chat.networkError': 'AI serveri va .env sozlamalarini tekshiring yoki terminalda npm start buyrug‘ini ishga tushiring.',
+      'chat.netlifyError': 'Netlify AI xizmatiga ulanib bo‘lmadi. Deploy holatini tekshiring.',
+      'chat.emptyResponse': 'Gemini bo‘sh javob qaytardi. Qayta urinib ko‘ring.',
+      'chat.responseError': 'Javob olishda xatolik yuz berdi. Qayta urinib ko‘ring.'
+    },
+    en: {
+      'language.label': 'Language',
+      'page.homeTitle': 'Ilyos | Home',
+      'page.chatTitle': 'Ilyos — AI assistant',
+      'nav.mainAria': 'Main navigation',
+      'nav.home': 'Home',
+      'nav.services': 'Services',
+      'nav.library': 'Library',
+      'nav.contact': 'Contact',
+      'nav.ai': 'AI mode',
+      'nav.profile': 'Profile',
+      'nav.profileAria': 'User profile',
+      'nav.menuOpen': 'Open menu',
+      'nav.menuClose': 'Close menu',
+      'profile.imageAlt': 'Profile picture',
+      'profile.details': 'Profile details',
+      'profile.close': 'Close',
+      'profile.user': 'User',
+      'hero.tag': 'Ilyos Web Platform',
+      'hero.title': 'Ilyos Web Application',
+      'hero.lede': 'A personal platform that shortens the path from an idea to a working solution.',
+      'hero.viewServices': 'Explore services',
+      'hero.toLibrary': 'Go to the library',
+      'stats.projects': 'completed projects',
+      'stats.services': 'core service areas',
+      'stats.guides': 'library guides',
+      'services.title': 'Our services',
+      'services.consulting': 'Consulting',
+      'services.consultingText': 'Modern solutions for your project.',
+      'services.modules': 'Module configuration',
+      'services.modulesText': 'Tailor features to your exact needs.',
+      'services.integration': 'Integration',
+      'services.integrationText': 'Connect software solutions.',
+      'services.support': 'Technical support',
+      'services.supportText': 'Optimization and security.',
+      'library.title': 'Reading materials',
+      'library.guide': 'Guide',
+      'library.collection': 'Collection',
+      'library.webTitle': 'Introduction to web development',
+      'library.webText': 'Frontend and backend fundamentals.',
+      'library.caseTitle': 'Practical case studies',
+      'library.caseText': 'Real examples and use cases.',
+      'library.uiTitle': 'UI/UX principles',
+      'library.uiText': 'Improve the user experience.',
+      'library.more': 'Learn more →',
+      'contact.tag': 'Get in touch',
+      'contact.title': 'Contact us',
+      'contact.lede': 'Have a question or want to start a project? Send us a message.',
+      'contact.name': 'Your name',
+      'contact.namePlaceholder': 'Enter your name...',
+      'contact.message': 'Your message',
+      'contact.messagePlaceholder': 'Write your message...',
+      'contact.send': 'Send message',
+      'contact.sending': 'Sending...',
+      'contact.sent': 'Message sent',
+      'contact.thanks': 'Thank you! Your message has been sent to our Telegram bot.',
+      'contact.close': 'Close',
+      'contact.startBot': 'Error: Please make sure you have started the bot.',
+      'contact.networkError': 'A network error occurred.',
+      'footer.tagline': 'Ilyos — digital solutions.',
+      'chat.new': 'New chat',
+      'chat.secure': 'ILYOS AI connects securely through the server.',
+      'chat.menuOpen': 'Open menu',
+      'chat.menuClose': 'Close menu',
+      'chat.statusConnecting': 'Connecting to Gemini...',
+      'chat.statusOnline': 'Ilyos AI — online',
+      'chat.statusError': 'Could not connect to the AI server',
+      'chat.backHome': 'Back to home',
+      'chat.welcome': 'Hello! Ilyos AI is listening.',
+      'chat.input': 'Write your message...',
+      'chat.send': 'Send',
+      'chat.disclaimer': 'Ilyos AI may make mistakes. Please verify important information.',
+      'chat.user': 'You',
+      'chat.delete': 'Delete open chat',
+      'chat.deleteConfirm': 'Delete the open chat? This action cannot be undone.',
+      'chat.storageError': 'Chat history could not be saved in the browser. Check available browser storage.',
+      'chat.serverNotReady': 'The Gemini server is not ready.',
+      'chat.localError': 'Could not connect to the AI server. Check VS Code Live Server and Netlify Functions settings.',
+      'chat.networkError': 'Check the AI server and .env settings, or run npm start in the terminal.',
+      'chat.netlifyError': 'Could not connect to the Netlify AI service. Check the deployment.',
+      'chat.emptyResponse': 'Gemini returned an empty response. Please try again.',
+      'chat.responseError': 'Something went wrong while getting a response. Please try again.'
+    },
+    ru: {
+      'language.label': 'Язык',
+      'page.homeTitle': 'Ilyos | Главная',
+      'page.chatTitle': 'Ilyos — ИИ-помощник',
+      'nav.mainAria': 'Основная навигация',
+      'nav.home': 'Главная',
+      'nav.services': 'Услуги',
+      'nav.library': 'Библиотека',
+      'nav.contact': 'Контакты',
+      'nav.ai': 'Режим ИИ',
+      'nav.profile': 'Профиль',
+      'nav.profileAria': 'Профиль пользователя',
+      'nav.menuOpen': 'Открыть меню',
+      'nav.menuClose': 'Закрыть меню',
+      'profile.imageAlt': 'Фото профиля',
+      'profile.details': 'Данные профиля',
+      'profile.close': 'Закрыть',
+      'profile.user': 'Пользователь',
+      'hero.tag': 'Веб-платформа Ilyos',
+      'hero.title': 'Веб-приложение Ilyos',
+      'hero.lede': 'Личная платформа, которая сокращает путь от идеи до готового решения.',
+      'hero.viewServices': 'Наши услуги',
+      'hero.toLibrary': 'Перейти в библиотеку',
+      'stats.projects': 'выполненных проектов',
+      'stats.services': 'основных направлений услуг',
+      'stats.guides': 'руководств в библиотеке',
+      'services.title': 'Все наши услуги',
+      'services.consulting': 'Консультации',
+      'services.consultingText': 'Современные решения для вашего проекта.',
+      'services.modules': 'Настройка модулей',
+      'services.modulesText': 'Адаптация функций под ваши задачи.',
+      'services.integration': 'Интеграция',
+      'services.integrationText': 'Подключение программных решений.',
+      'services.support': 'Техническая поддержка',
+      'services.supportText': 'Оптимизация и безопасность.',
+      'library.title': 'Материалы для чтения',
+      'library.guide': 'Руководство',
+      'library.collection': 'Подборка',
+      'library.webTitle': 'Введение в веб-разработку',
+      'library.webText': 'Основы frontend и backend.',
+      'library.caseTitle': 'Практические кейсы',
+      'library.caseText': 'Реальные примеры и сценарии.',
+      'library.uiTitle': 'Принципы UI/UX',
+      'library.uiText': 'Улучшение пользовательского опыта.',
+      'library.more': 'Подробнее →',
+      'contact.tag': 'Связаться',
+      'contact.title': 'Свяжитесь с нами',
+      'contact.lede': 'Есть вопросы или хотите начать новый проект? Напишите нам.',
+      'contact.name': 'Ваше имя',
+      'contact.namePlaceholder': 'Введите ваше имя...',
+      'contact.message': 'Ваше сообщение',
+      'contact.messagePlaceholder': 'Напишите сообщение...',
+      'contact.send': 'Отправить сообщение',
+      'contact.sending': 'Отправка...',
+      'contact.sent': 'Сообщение отправлено',
+      'contact.thanks': 'Спасибо! Ваше сообщение отправлено в Telegram-бот.',
+      'contact.close': 'Закрыть',
+      'contact.startBot': 'Ошибка: убедитесь, что вы запустили бота командой Start.',
+      'contact.networkError': 'Произошла ошибка интернет-соединения.',
+      'footer.tagline': 'Ilyos — цифровые решения.',
+      'chat.new': 'Новый чат',
+      'chat.secure': 'ILYOS AI безопасно подключается через сервер.',
+      'chat.menuOpen': 'Открыть меню',
+      'chat.menuClose': 'Закрыть меню',
+      'chat.statusConnecting': 'Подключение к Gemini...',
+      'chat.statusOnline': 'Ilyos AI — онлайн',
+      'chat.statusError': 'Не удалось подключиться к серверу ИИ',
+      'chat.backHome': 'Вернуться на главную',
+      'chat.welcome': 'Здравствуйте! Ilyos AI вас слушает.',
+      'chat.input': 'Напишите сообщение...',
+      'chat.send': 'Отправить',
+      'chat.disclaimer': 'Ilyos AI может ошибаться. Проверяйте важную информацию.',
+      'chat.user': 'Вы',
+      'chat.delete': 'Удалить открытый чат',
+      'chat.deleteConfirm': 'Удалить открытый чат? Это действие нельзя отменить.',
+      'chat.storageError': 'Не удалось сохранить историю чатов в браузере. Проверьте доступное место.',
+      'chat.serverNotReady': 'Сервер Gemini не готов.',
+      'chat.localError': 'Не удалось подключиться к серверу ИИ. Проверьте Live Server в VS Code и настройки Netlify Functions.',
+      'chat.networkError': 'Проверьте сервер ИИ и настройки .env или запустите npm start в терминале.',
+      'chat.netlifyError': 'Не удалось подключиться к сервису Netlify AI. Проверьте статус развёртывания.',
+      'chat.emptyResponse': 'Gemini вернул пустой ответ. Попробуйте ещё раз.',
+      'chat.responseError': 'Не удалось получить ответ. Попробуйте ещё раз.'
+    }
+  };
+
+  const languageStorageKey = 'ilyosLanguage';
+  const supportedLanguages = Object.keys(translations);
+  let language = supportedLanguages.includes(localStorage.getItem(languageStorageKey))
+    ? localStorage.getItem(languageStorageKey)
+    : 'uz';
+
+  function translate(key) {
+    return translations[language][key] || translations.uz[key] || key;
+  }
+
+  function applyTranslations() {
+    document.documentElement.lang = language;
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      element.textContent = translate(element.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+      element.setAttribute('placeholder', translate(element.dataset.i18nPlaceholder));
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+      element.setAttribute('aria-label', translate(element.dataset.i18nAriaLabel));
+    });
+    document.querySelectorAll('[data-i18n-alt]').forEach(element => {
+      element.setAttribute('alt', translate(element.dataset.i18nAlt));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+      element.setAttribute('title', translate(element.dataset.i18nTitle));
+    });
+    const selector = document.getElementById('languageSelect');
+    if (selector) {
+      selector.value = language;
+      selector.setAttribute('aria-label', translate('language.label'));
+    }
+  }
+
+  function setLanguage(nextLanguage) {
+    if (!supportedLanguages.includes(nextLanguage)) return;
+    language = nextLanguage;
+    localStorage.setItem(languageStorageKey, language);
+    applyTranslations();
+    window.dispatchEvent(new CustomEvent('ilyoslanguagechange', { detail: { language } }));
+  }
+
+  window.ilyosT = translate;
+  window.ilyosLanguage = () => language;
+  window.addEventListener('storage', event => {
+    if (event.key === languageStorageKey && supportedLanguages.includes(event.newValue)) {
+      language = event.newValue;
+      applyTranslations();
+      window.dispatchEvent(new CustomEvent('ilyoslanguagechange', { detail: { language } }));
+    }
+  });
+
+  applyTranslations();
+  document.getElementById('languageSelect')?.addEventListener('change', event => {
+    setLanguage(event.target.value);
+  });
+})();

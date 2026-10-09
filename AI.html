@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ilyos — AI yordamchi</title>
+<title data-i18n="page.chatTitle">Ilyos — AI yordamchi</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="./cursor.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -205,6 +205,18 @@
     -webkit-backdrop-filter: blur(16px);
     z-index: 10;
   }
+  .language-select {
+    min-width: 112px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-glow);
+    border-radius: 100px;
+    background: rgba(16, 21, 36, 0.9);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: .88rem;
+    cursor: pointer;
+  }
+  .language-select option { background: #101524; color: #fff; }
 
   .menu-toggle {
     display: none;
@@ -615,7 +627,7 @@
   @media (max-width: 520px) {
     header {
       display: grid;
-      grid-template-columns: 40px 38px minmax(0, 1fr) 38px;
+      grid-template-columns: 40px 38px minmax(0, 1fr) auto 38px;
       align-items: center;
       gap: 8px;
       padding: 10px 14px;
@@ -628,7 +640,8 @@
     h1 { font-size: 18px; }
     .status { min-width: 0; font-size: 11px; }
     .status span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .account-badge { grid-column: 4; }
+    .language-select { grid-column: 4; grid-row: 1; min-width: 88px; padding: 8px; font-size: 12px; }
+    .account-badge { grid-column: 5; }
     .back-home { grid-column: 1 / -1; justify-self: end; margin-left: 0; padding: 7px 12px; }
     .top-links { display: none; }
     main { padding: 18px 16px 12px; gap: 12px; }
@@ -651,17 +664,17 @@
 <aside class="sidebar" id="sidebar">
   <button class="new-chat-btn" id="newChatBtn" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    Yangi chat
+    <span data-i18n="chat.new">Yangi chat</span>
   </button>
   <div class="chat-history"></div>
   <div class="sidebar-footer">
-    <div class="history-item">ILYOS AI server orqali xavfsiz ulanadi.</div>
+    <div class="history-item" data-i18n="chat.secure">ILYOS AI server orqali xavfsiz ulanadi.</div>
   </div>
 </aside>
 
 <div class="shell">
   <header data-aos="fade-down" data-aos-duration="700">
-    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Menyuni ochish" aria-controls="sidebar" aria-expanded="false">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Menyuni ochish" data-i18n-aria-label="chat.menuOpen" aria-controls="sidebar" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
     <div class="mark">
@@ -669,36 +682,42 @@
     </div>
     <div class="headline">
       <h1>Ilyos</h1>
-      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Ulanmoqda...</span></div>
+      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText" data-i18n="chat.statusConnecting">Ulanmoqda...</span></div>
     </div>
     <div class="top-links"></div>
+    <select class="language-select" id="languageSelect" aria-label="Til">
+      <option value="uz">O‘zbekcha</option>
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+    </select>
     <div class="account-badge" id="accountBadge" hidden aria-label="Google akkaunti">
       <img class="account-avatar" id="accountAvatar" alt="" hidden>
       <span class="account-avatar" id="accountInitials" aria-hidden="true"></span>
       <span class="account-name" id="accountName"></span>
     </div>
-    <button type="button" class="back-home" onclick="window.location.href='./home.html'">Bosh sahifaga qaytish</button>
+    <button type="button" class="back-home" onclick="window.location.href='./home.html'" data-i18n="chat.backHome">Bosh sahifaga qaytish</button>
   </header>
 
   <main id="chat" data-aos="fade-up">
-    <h1 class="welcome-title" data-aos="zoom-in" data-aos-delay="120">Assalomu alaykum! Ilyos AI eshitadi.</h1>
+    <h1 class="welcome-title" data-aos="zoom-in" data-aos-delay="120" data-i18n="chat.welcome">Assalomu alaykum! Ilyos AI eshitadi.</h1>
   </main>
 
   <footer data-aos="fade-up">
     <div class="footer-inner">
       <form id="form">
-        <textarea id="input" placeholder="Xabaringizni yozing..." rows="1"></textarea>
-        <button class="send" type="submit" id="sendBtn" aria-label="Yuborish" disabled>
+        <textarea id="input" placeholder="Xabaringizni yozing..." data-i18n-placeholder="chat.input" rows="1"></textarea>
+        <button class="send" type="submit" id="sendBtn" aria-label="Yuborish" data-i18n-aria-label="chat.send" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
         </button>
       </form>
-      <div class="disclaimer">Ilyos AI xatoliklarga yo'l qo'yishi mumkin. Muhim masalalarda tekshirib ko'ring.</div>
+      <div class="disclaimer" data-i18n="chat.disclaimer">Ilyos AI xatoliklarga yo'l qo'yishi mumkin. Muhim masalalarda tekshirib ko'ring.</div>
     </div>
   </footer>
 </div>
 
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script>AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });</script>
+<script src="./language.js"></script>
 
 <script>
   const chat = document.getElementById('chat');
@@ -750,7 +769,7 @@
       console.error('Chat tarixini saqlab bo‘lmadi:', error);
       if (!storageWarningShown) {
         storageWarningShown = true;
-        addAgentMessage('Chat tarixini brauzerda saqlab bo‘lmadi. Brauzer xotirasida joy borligini tekshiring.');
+        addAgentMessage(ilyosT('chat.storageError'));
       }
     }
     renderChatHistory();
@@ -775,8 +794,8 @@
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.className = 'delete-chat-btn';
-        deleteButton.setAttribute('aria-label', 'Ochiq chatni o‘chirish');
-        deleteButton.title = 'Ochiq chatni o‘chirish';
+        deleteButton.setAttribute('aria-label', ilyosT('chat.delete'));
+        deleteButton.title = ilyosT('chat.delete');
         deleteButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>';
         deleteButton.addEventListener('click', deleteActiveChat);
         row.appendChild(deleteButton);
@@ -814,7 +833,7 @@
 
   function deleteActiveChat() {
     if (!activeChatId) return;
-    if (!window.confirm('Ochiq chatni o‘chirishni xohlaysizmi? Bu amalni ortga qaytarib bo‘lmaydi.')) return;
+    if (!window.confirm(ilyosT('chat.deleteConfirm'))) return;
 
     chats = chats.filter(savedChat => savedChat.id !== activeChatId);
     activeChatId = null;
@@ -855,6 +874,11 @@
 
   menuToggle.addEventListener('click', toggleSidebar);
   sidebarOverlay.addEventListener('click', closeSidebar);
+  window.addEventListener('ilyoslanguagechange', () => {
+    menuToggle.setAttribute('aria-label', sidebar.classList.contains('open') ? ilyosT('chat.menuClose') : ilyosT('chat.menuOpen'));
+    setStatus(ready ? ilyosT('chat.statusOnline') : ilyosT('chat.statusConnecting'), ready);
+    renderChatHistory();
+  });
 
   function setStatus(text, online) {
     statusText.textContent = text;
@@ -880,7 +904,7 @@
   function addUserMessage(text) {
     const el = document.createElement('div');
     el.className = 'msg user';
-    el.innerHTML = '<span class="label">Siz</span>' + escapeHtml(text);
+    el.innerHTML = '<span class="label">' + escapeHtml(ilyosT('chat.user')) + '</span>' + escapeHtml(text);
     chat.appendChild(el);
     scrollToEnd();
   }
@@ -909,21 +933,21 @@
   }
 
   async function initGemini() {
-    setStatus('Gemini bilan ulanmoqda...', false);
+    setStatus(ilyosT('chat.statusConnecting'), false);
     try {
       const health = await fetch(`${apiBase}/api/health`).then(readJson);
-      if (!health.ready) throw new Error(health.error || 'Gemini serveri tayyor emas.');
-      setStatus('Ilyos AI — onlayn', true);
+      if (!health.ready) throw new Error(health.error || ilyosT('chat.serverNotReady'));
+      setStatus(ilyosT('chat.statusOnline'), true);
       ready = true;
       sendBtn.disabled = false;
     } catch (e) {
       console.error(e);
-      setStatus('AI serveriga ulanib bo‘lmadi', false);
+      setStatus(ilyosT('chat.statusError'), false);
       const message = e instanceof TypeError
         ? isLocalHost
-          ? 'AI serveriga ulanib bo‘lmadi. VS Code oynaoy holati va Netlify Functions sozlamalarini tekshiring.'
-        : e.message || 'AI serveri va .env ozlamalarinisini qayta oching yoki terminalda npm start buyrug‘ini ishga tushiring.'
-          : 'Netlify AI xizmatiga ulanib bo‘lmadi. Depl tekshiring.';
+        ? ilyosT('chat.localError')
+        : e.message || ilyosT('chat.networkError')
+        : ilyosT('chat.netlifyError');
       addAgentMessage(message);
     }
   }
@@ -952,13 +976,14 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: activeChat.messages
+          messages: activeChat.messages,
+          language: ilyosLanguage()
         })
       });
       const result = await readJson(response);
       removeTyping();
       if (typeof result.text !== 'string' || !result.text.trim()) {
-        throw new Error('Gemini bo‘sh javob qaytardi. Qayta urinib ko‘ring.');
+        throw new Error(ilyosT('chat.emptyResponse'));
       }
       activeChat.messages.push({ role: 'model', text: result.text });
       activeChat.messages = activeChat.messages.slice(-28);
@@ -972,7 +997,7 @@
       removeTyping();
       console.error(err);
       if (activeChatId === activeChat.id) {
-        addAgentMessage(err.message || "Javob olishda xatolik yuz berdi. Qayta urinib ko‘ring.");
+        addAgentMessage(err.message || ilyosT('chat.responseError'));
       }
     } finally {
       responding = false;

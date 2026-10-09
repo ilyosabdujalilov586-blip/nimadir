@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ilyos | Bosh sahifa</title>
+  <title data-i18n="page.homeTitle">Ilyos | Bosh sahifa</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="./cursor.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,6 +134,18 @@
       box-shadow: 0 8px 25px rgba(217, 70, 239, 0.6);
       background: var(--gradient-brand-hover);
     }
+    .language-select {
+      min-width: 112px;
+      padding: 9px 12px;
+      border: 1px solid var(--line-glow);
+      border-radius: 100px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      font-size: .88rem;
+      cursor: pointer;
+    }
+    .language-select option { background: #101526; color: #fff; }
 
     /* Burger Button */
     .burger-btn {
@@ -426,6 +438,7 @@
       .nav-links.is-active a:nth-child(3) { animation-delay: 0.08s; }
       .nav-links.is-active a:nth-child(4) { animation-delay: 0.12s; }
       .nav-links.is-active a:nth-child(5) { animation-delay: 0.16s; }
+      .nav-links .language-select { width: 100%; padding: 14px 16px; border-radius: 14px; font-size: 1rem; }
 
       .menu-backdrop {
         background: rgba(7, 9, 19, 0.42);
@@ -614,20 +627,25 @@
       <img src="favicon.svg" alt="Ilyos AI Logo" style="width: 28px; height: 28px;">
       <span id="brandAccountName" style="font-size: 20px; margin: 0; background: none; -webkit-background-clip: unset; color: inherit; max-width: none;">IlYOS AI</span>
     </div>
-    <nav class="nav-links" id="navLinks" aria-label="Asosiy navigatsiya">
-      <a class="active" href="#home">Bosh sahifa</a>
-      <a href="#services">Xizmatlar</a>
-      <a href="#library">Kutubxona</a>
-      <a href="#contact">Aloqa</a>
+    <nav class="nav-links" id="navLinks" aria-label="Asosiy navigatsiya" data-i18n-aria-label="nav.mainAria">
+      <a class="active" href="#home" data-i18n="nav.home">Bosh sahifa</a>
+      <a href="#services" data-i18n="nav.services">Xizmatlar</a>
+      <a href="#library" data-i18n="nav.library">Kutubxona</a>
+      <a href="#contact" data-i18n="nav.contact">Aloqa</a>
       
-      <a class="ai-btn" href="./AI.html"> AI rejimi</a>
+      <a class="ai-btn" href="./AI.html" data-i18n="nav.ai">AI rejimi</a>
+      <select class="language-select" id="languageSelect" aria-label="Til">
+        <option value="uz">O‘zbekcha</option>
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+      </select>
 
-      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili" style="display: none;">
-        <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff">
-        <span class="account-name" id="accountName">Profil</span>
+      <div class="account-badge" id="accountBadge" aria-label="Foydalanuvchi profili" data-i18n-aria-label="nav.profileAria" style="display: none;">
+        <img class="account-avatar" id="accountAvatar" alt="Profil rasmi" data-i18n-alt="profile.imageAlt" src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff">
+        <span class="account-name" id="accountName" data-i18n="nav.profile">Profil</span>
       </div>
     </nav>
-    <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menyuni ochish" aria-controls="navLinks" aria-expanded="false">
+    <button class="burger-btn" id="burgerBtn" type="button" aria-label="Menyuni ochish" data-i18n-aria-label="nav.menuOpen" aria-controls="navLinks" aria-expanded="false">
       <span></span>
       <span></span>
       <span></span>
@@ -637,14 +655,14 @@
 
   <div class="profile-offcanvas" id="profileOffcanvas">
     <div class="offcanvas-header">
-      <h2 style="margin: 0; font-size: 18px;">Profil Ma'lumotlari</h2>
-      <button type="button" class="close-offcanvas-btn" id="closeOffcanvasBtn" aria-label="Yopish">
+      <h2 style="margin: 0; font-size: 18px;" data-i18n="profile.details">Profil Ma'lumotlari</h2>
+      <button type="button" class="close-offcanvas-btn" id="closeOffcanvasBtn" aria-label="Yopish" data-i18n-aria-label="profile.close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <div class="offcanvas-user-info">
-      <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="Profil">
-      <h3 style="margin: 0; font-size: 20px;" id="offcanvasName">Foydalanuvchi</h3>
+      <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="Profil" data-i18n-alt="profile.imageAlt">
+      <h3 style="margin: 0; font-size: 20px;" id="offcanvasName" data-i18n="profile.user">Foydalanuvchi</h3>
       <p style="margin: 0; color: var(--ink-muted); font-size: 14px;" id="offcanvasEmail">user@example.com</p>
     </div>
   </div>
@@ -652,76 +670,77 @@
   <main id="home">
     <section data-aos="fade-up">
       <div style="text-align: center;">
-        <div class="tag" data-aos="fade-up">Ilyos Web Platform</div>
+        <div class="tag" data-aos="fade-up" data-i18n="hero.tag">Ilyos Web Platform</div>
       </div>
-      <h1 class="Ilyos-title" data-aos="zoom-in" data-aos-delay="100">Ilyos Web Application</h1>
-      <p class="lede" data-aos="fade-up" data-aos-delay="170">G'oyadan ishlab turgan yechimgacha bo'lgan yo'lni qisqartiradigan shaxsiy platforma.</p>
+      <h1 class="Ilyos-title" data-aos="zoom-in" data-aos-delay="100" data-i18n="hero.title">Ilyos Web Application</h1>
+      <p class="lede" data-aos="fade-up" data-aos-delay="170" data-i18n="hero.lede">G'oyadan ishlab turgan yechimgacha bo'lgan yo'lni qisqartiradigan shaxsiy platforma.</p>
       <div class="btnrow" data-aos="fade-up" data-aos-delay="230">
-        <a class="btn" href="#services">Xizmatlarni ko'rish</a>
-        <a class="btn ghost" href="#library">Kutubxonaga o'tish</a>
+        <a class="btn" href="#services" data-i18n="hero.viewServices">Xizmatlarni ko'rish</a>
+        <a class="btn ghost" href="#library" data-i18n="hero.toLibrary">Kutubxonaga o'tish</a>
       </div>
       <div class="stats" data-aos="fade-up" data-aos-delay="300">
-        <div class="stat"><div class="num">40+</div><div class="lbl">bajarilgan loyiha</div></div>
-        <div class="stat"><div class="num">4</div><div class="lbl">asosiy xizmat yo'nalishi</div></div>
-        <div class="stat"><div class="num">10+</div><div class="lbl">kutubxonadagi qo'llanma</div></div>
+        <div class="stat"><div class="num">40+</div><div class="lbl" data-i18n="stats.projects">bajarilgan loyiha</div></div>
+        <div class="stat"><div class="num">4</div><div class="lbl" data-i18n="stats.services">asosiy xizmat yo'nalishi</div></div>
+        <div class="stat"><div class="num">10+</div><div class="lbl" data-i18n="stats.guides">kutubxonadagi qo'llanma</div></div>
       </div>
     </section>
 
     <section id="services">
-      <p class="tag">Xizmatlar</p>
-      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">To'liq xizmatlar ro'yxati</h2>
+      <p class="tag" data-i18n="nav.services">Xizmatlar</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);" data-i18n="services.title">To'liq xizmatlar ro'yxati</h2>
       <div class="list">
-        <div class="row"><div class="txt"><h3>Maslahat berish</h3><p>Loyihangiz uchun zamonaviy yechimlar.</p></div><div class="mark">01</div></div>
-        <div class="row"><div class="txt"><h3>Modullarni sozlash</h3><p>Funksiyalarni aniq vazifangizga moslash.</p></div><div class="mark">02</div></div>
-        <div class="row"><div class="txt"><h3>Integratsiya</h3><p>Dasturiy yechimlarni ulash.</p></div><div class="mark">03</div></div>
-        <div class="row"><div class="txt"><h3>Texnik qo'llab-quvvatlash</h3><p>Optimallashtirish va xavfsizlik.</p></div><div class="mark">04</div></div>
+        <div class="row"><div class="txt"><h3 data-i18n="services.consulting">Maslahat berish</h3><p data-i18n="services.consultingText">Loyihangiz uchun zamonaviy yechimlar.</p></div><div class="mark">01</div></div>
+        <div class="row"><div class="txt"><h3 data-i18n="services.modules">Modullarni sozlash</h3><p data-i18n="services.modulesText">Funksiyalarni aniq vazifangizga moslash.</p></div><div class="mark">02</div></div>
+        <div class="row"><div class="txt"><h3 data-i18n="services.integration">Integratsiya</h3><p data-i18n="services.integrationText">Dasturiy yechimlarni ulash.</p></div><div class="mark">03</div></div>
+        <div class="row"><div class="txt"><h3 data-i18n="services.support">Texnik qo'llab-quvvatlash</h3><p data-i18n="services.supportText">Optimallashtirish va xavfsizlik.</p></div><div class="mark">04</div></div>
       </div>
     </section>
 
     <section id="library">
-      <p class="tag">Kutubxona</p>
-      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">O'qish uchun materiallar</h2>
+      <p class="tag" data-i18n="nav.library">Kutubxona</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);" data-i18n="library.title">O'qish uchun materiallar</h2>
       <div class="grid">
-        <div class="card"><span class="cat">Qo'llanma</span><h3>Web dasturlashga kirish</h3><p>Frontend va backend asoslari.</p><span class="open">Batafsil →</span></div>
-        <div class="card"><span class="cat">To'plam</span><h3>Amaliy holatlar to'plami</h3><p>Real misollar va keyslar.</p><span class="open">Batafsil →</span></div>
-        <div class="card"><span class="cat">Qo'llanma</span><h3>UI/UX tamoyillari</h3><p>Foydalanuvchi tajribasini yaxshilash.</p><span class="open">Batafsil →</span></div>
+        <div class="card"><span class="cat" data-i18n="library.guide">Qo'llanma</span><h3 data-i18n="library.webTitle">Web dasturlashga kirish</h3><p data-i18n="library.webText">Frontend va backend asoslari.</p><span class="open" data-i18n="library.more">Batafsil →</span></div>
+        <div class="card"><span class="cat" data-i18n="library.collection">To'plam</span><h3 data-i18n="library.caseTitle">Amaliy holatlar to'plami</h3><p data-i18n="library.caseText">Real misollar va keyslar.</p><span class="open" data-i18n="library.more">Batafsil →</span></div>
+        <div class="card"><span class="cat" data-i18n="library.guide">Qo'llanma</span><h3 data-i18n="library.uiTitle">UI/UX tamoyillari</h3><p data-i18n="library.uiText">Foydalanuvchi tajribasini yaxshilash.</p><span class="open" data-i18n="library.more">Batafsil →</span></div>
       </div>
     </section>
 
     <!-- ALOQA QISMI -->
     <section id="contact">
-      <p class="tag">Bog'lanish</p>
-      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);">Biz bilan aloqa</h2>
-      <p class="lede" style="text-align:left; max-width:58ch; margin:0 0 32px;">Savollaringiz bormi yoki yangi loyiha boshlamoqchimisiz? Bizga yozing.</p>
+      <p class="tag" data-i18n="contact.tag">Bog'lanish</p>
+      <h2 style="margin:0 0 18px; font-size:clamp(2rem,5vw,3rem);" data-i18n="contact.title">Biz bilan aloqa</h2>
+      <p class="lede" style="text-align:left; max-width:58ch; margin:0 0 32px;" data-i18n="contact.lede">Savollaringiz bormi yoki yangi loyiha boshlamoqchimisiz? Bizga yozing.</p>
       <div class="form-wrap">
         <div class="field">
-          <label for="contactName">Ismingiz</label>
-          <input id="contactName" type="text" placeholder="Ismingizni kiriting..." />
+          <label for="contactName" data-i18n="contact.name">Ismingiz</label>
+          <input id="contactName" type="text" placeholder="Ismingizni kiriting..." data-i18n-placeholder="contact.namePlaceholder" />
         </div>
         <div class="field">
-          <label for="contactMsg">Xabaringiz</label>
-          <textarea id="contactMsg" placeholder="Xabaringizni yozing..."></textarea>
+          <label for="contactMsg" data-i18n="contact.message">Xabaringiz</label>
+          <textarea id="contactMsg" placeholder="Xabaringizni yozing..." data-i18n-placeholder="contact.messagePlaceholder"></textarea>
         </div>
-        <button class="btn" id="sendContact" type="button">Xabarni yuborish</button>
+        <button class="btn" id="sendContact" type="button" data-i18n="contact.send">Xabarni yuborish</button>
       </div>
     </section>
   </main>
 
   <div class="footer">
-    <div>Ilyos — raqamli yechimlar.</div>
+    <div data-i18n="footer.tagline">Ilyos — raqamli yechimlar.</div>
     <div>© 2026 Ilyos</div>
   </div>
 
   <div class="success-modal" id="successModal">
     <div class="success-dialog">
       <div class="success-check">✓</div>
-      <h2>Xabar yuborildi</h2>
-      <p>Rahmat! Xabaringiz Telegram botga yuborildi.</p>
-      <button class="modal-close" id="closeModal" type="button">Yopish</button>
+      <h2 data-i18n="contact.sent">Xabar yuborildi</h2>
+      <p data-i18n="contact.thanks">Rahmat! Xabaringiz Telegram botga yuborildi.</p>
+      <button class="modal-close" id="closeModal" type="button" data-i18n="contact.close">Yopish</button>
     </div>
   </div>
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="./language.js"></script>
   <script>
     if (window.AOS) {
       AOS.init({ once: true, duration: 1100, easing: 'ease-out-cubic' });
@@ -737,7 +756,7 @@
       navLinks.classList.toggle('is-active', isOpen);
       menuBackdrop.classList.toggle('is-active', isOpen);
       burgerBtn.setAttribute('aria-expanded', String(isOpen));
-      burgerBtn.setAttribute('aria-label', isOpen ? 'Menyuni yopish' : 'Menyuni ochish');
+      burgerBtn.setAttribute('aria-label', isOpen ? ilyosT('nav.menuClose') : ilyosT('nav.menuOpen'));
       document.body.style.overflow = isOpen ? 'hidden' : '';
     }
 
@@ -747,12 +766,15 @@
       if (menuBackdrop) menuBackdrop.classList.remove('is-active');
       if (burgerBtn) {
         burgerBtn.setAttribute('aria-expanded', 'false');
-        burgerBtn.setAttribute('aria-label', 'Menyuni ochish');
+        burgerBtn.setAttribute('aria-label', ilyosT('nav.menuOpen'));
       }
       document.body.style.overflow = '';
     }
 
     if (burgerBtn) burgerBtn.addEventListener('click', toggleMenu);
+    window.addEventListener('ilyoslanguagechange', () => {
+      if (burgerBtn) burgerBtn.setAttribute('aria-label', navLinks.classList.contains('is-active') ? ilyosT('nav.menuClose') : ilyosT('nav.menuOpen'));
+    });
     
     const profileOffcanvas = document.getElementById('profileOffcanvas');
     const closeOffcanvasBtn = document.getElementById('closeOffcanvasBtn');
@@ -841,7 +863,7 @@
       }
 
       sendContact.disabled = true;
-      sendContact.textContent = "Yuborilmoqda...";
+      sendContact.textContent = ilyosT('contact.sending');
 
       // Sizning token va chat ID shu yerga qo'yildi
       const token = "8831562668:AAEM5PvV0QY6dJl12w0pAmR27u-z_v4EN9w";
@@ -870,13 +892,13 @@
           contactMsg.value = '';
           closeModal.focus();
         } else {
-          alert("Xatolik: Botga Start bosganingizga amin bo'ling!");
+          alert(ilyosT('contact.startBot'));
         }
       } catch (error) {
-        alert("Internet aloqasida xatolik yuz berdi.");
+        alert(ilyosT('contact.networkError'));
       } finally {
         sendContact.disabled = false;
-        sendContact.textContent = "Xabarni yuborish";
+        sendContact.textContent = ilyosT('contact.send');
       }
     });
 

@@ -1,7 +1,7 @@
 const { createServer } = require('node:http');
 const { readFile } = require('node:fs/promises');
 const path = require('node:path');
-const { createAi, generateContent, models } = require('./netlify/functions/_shared.cjs');
+const { createAi, generateContent, getLanguage, localizedError, models } = require('./netlify/functions/_shared.cjs');
 
 const root = __dirname;
 require('dotenv').config({ path: path.join(root, '.env') });
@@ -15,7 +15,7 @@ const mimeTypes = {
   '.js': 'text/javascript; charset=utf-8'
 };
 const publicFiles = new Set([
-  '/AI.html', '/aloqa.html', '/home.html', '/index.html',
+  '/AI.html', '/aloqa.html', '/home.html', '/index.html', '/language.js',
   '/kutubxona.html', '/main.css', '/main.js', '/main-2.js', '/xizmatlar.html'
 ]);
 
@@ -70,8 +70,9 @@ async function handleChat(request, response) {
 
   const messages = body?.messages;
   const requestedModel = body?.model || model;
+  const language = getLanguage(body?.language);
   if (typeof requestedModel !== 'string' || !modelIds.has(requestedModel)) {
-    sendJson(response, 400, { error: 'Tanlangan Gemini modeli qo‘llab-quvvatlanmaydi.' });
+    sendJson(response, 400, { error: localizedError(language, 'model') });
     return;
   }
 
@@ -80,23 +81,23 @@ async function handleChat(request, response) {
         !message || !['user', 'model'].includes(message.role) ||
         typeof message.text !== 'string' || message.text.length < 1 || message.text.length > 5000
       ) || messages[messages.length - 1].role !== 'user') {
-    sendJson(response, 400, { error: 'Xabarlar noto‘g‘ri formatda.' });
+    sendJson(response, 400, { error: localizedError(language, 'messages') });
     return;
   }
 
   try {
     const contents = messages.map(({ role, text }) => ({ role, parts: [{ text }] }));
-    const result = await generateContent(ai, contents, requestedModel);
+    const result = await generateContent(ai, contents, requestedModel, language);
     if (!result.text) throw new Error('Gemini returned an empty response');
     sendJson(response, 200, { text: result.text });
   } catch (error) {
     console.error('Gemini request failed:', error);
     const status = [429, 503].includes(error.status) ? 503 : 502;
     const message = status === 503
-      ? 'Gemini hozir band. Iltimos, birozdan keyin qayta urinib ko‘ring.'
+      ? localizedError(language, 'busy')
       : [400, 401, 403].includes(error.status)
-        ? 'Gemini API kaliti yoki model sozlamasini tekshiring.'
-        : 'Gemini xizmatidan javob olishda xatolik.';
+        ? localizedError(language, 'config')
+        : localizedError(language, 'error');
     sendJson(response, status, { error: message });
   }
 }
