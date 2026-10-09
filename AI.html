@@ -744,28 +744,58 @@
   const historyStoragePrefix = 'ilyos_chat_history:';
   let historyStorageKey = `${historyStoragePrefix}guest`;
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  const apiBase = isLocalHost ? 'http://127.0.0.1:5508' : '';
+  const apiBase = isLocalHost ? `http://${window.location.hostname}:5508` : '';
   let responding = false;
   let ready = false;
   let chats = [];
   let activeChatId = null;
   let conversation = [];
   let storageWarningShown = false;
+  let authenticatedAccount = false;
+  let remoteSyncEnabled = false;
+  let remoteChatsEtag = '';
+  let remoteSaveTimer = null;
+  let remoteSaveQueue = Promise.resolve();
+  let syncWarningShown = false;
 
-  function initializeAccount() {
+  function showAccount(user) {
+    accountName.textContent = user.name;
+    accountInitials.textContent = user.name.charAt(0).toUpperCase();
+    accountBadge.hidden = false;
+    accountBadge.setAttribute('aria-label', user.name);
+  }
+
+  async function initializeAccount() {
+    let cachedUser = null;
     try {
-      const activeUser = JSON.parse(localStorage.getItem('ilyosActiveUser') || 'null');
-      const email = typeof activeUser?.email === 'string' ? activeUser.email.trim().toLowerCase() : '';
-      if (email) historyStorageKey = `${historyStoragePrefix}${encodeURIComponent(email)}`;
-
-      if (activeUser && typeof activeUser.name === 'string' && activeUser.name.trim()) {
-        accountName.textContent = activeUser.name.trim();
-        accountInitials.textContent = activeUser.name.trim().charAt(0).toUpperCase();
-        accountBadge.hidden = false;
-        accountBadge.setAttribute('aria-label', activeUser.name.trim());
-      }
+      cachedUser = JSON.parse(localStorage.getItem('ilyosActiveUser') || 'null');
     } catch (error) {
       console.error('Faol akkaunt ma’lumotlarini o‘qib bo‘lmadi:', error);
+    }
+    if (typeof cachedUser?.email === 'string') {
+      historyStorageKey = `${historyStoragePrefix}${encodeURIComponent(cachedUser.email.trim().toLowerCase())}`;
+      if (typeof cachedUser.name === 'string' && cachedUser.name.trim()) showAccount(cachedUser);
+    }
+
+    try {
+      const response = await fetch(`${apiBase}/api/account`, { credentials: 'include' });
+      if (response.status === 401) {
+        historyStorageKey = `${historyStoragePrefix}guest`;
+        accountBadge.hidden = true;
+        localStorage.removeItem('ilyosActiveUser');
+        return;
+      }
+      const result = await readJson(response);
+      if (!result.user || typeof result.user.email !== 'string' || typeof result.user.name !== 'string') {
+        throw new Error('Server returned an invalid account.');
+      }
+      cachedUser = result.user;
+      localStorage.setItem('ilyosActiveUser', JSON.stringify(cachedUser));
+      historyStorageKey = `${historyStoragePrefix}${encodeURIComponent(cachedUser.email.trim().toLowerCase())}`;
+      showAccount(cachedUser);
+      authenticatedAccount = true;
+    } catch (error) {
+      console.error('Cloud account session could not be loaded:', error);
     }
   }
 
@@ -774,13 +804,15 @@
       const saved = JSON.parse(localStorage.getItem(historyStorageKey) || '[]');
       if (!Array.isArray(saved)) throw new Error('Chat tarixi formati noto‘g‘ri.');
       return saved.filter(item =>
-        item && typeof item.id === 'string' &&
-        typeof item.title === 'string' &&
-        Array.isArray(item.messages) &&
-        item.messages.every(message =>
-          message && ['user', 'model'].includes(message.role) &&
-          typeof message.text === 'string'
-        )
+        item && typeof item.id === 'string' && Number.isFinite(item.updatedAt) &&
+        (Number.isFinite(item.deletedAt) || (
+          typeof item.title === 'string' &&
+          Array.isArray(item.messages) &&
+          item.messages.every(message =>
+            message && ['user', 'model'].includes(message.role) &&
+            typeof message.text === 'string'
+          )
+        ))
       );
     } catch (error) {
       console.error('Chat tarixini o‘qib bo‘lmadi:', error);
@@ -801,11 +833,97 @@
       }
     }
     renderChatHistory();
+    scheduleRemoteSave();
+  }
+
+  function mergeChatLists(first, second) {
+    const merged = new Map();
+    [...first, ...second].forEach(item => {
+      if (!item || typeof item.id !== 'string') return;
+      const previous = merged.get(item.id);
+      if (!previous ||
+          (Number.isFinite(item.deletedAt) && !Number.isFinite(previous.deletedAt)) ||
+          (!Number.isFinite(item.deletedAt) && !Number.isFinite(previous.deletedAt) &&
+            (item.updatedAt || 0) > (previous.updatedAt || 0))) {
+        merged.set(item.id, item);
+      }
+    });
+    return [...merged.values()]
+      .sort((left, right) => (right.updatedAt || 0) - (left.updatedAt || 0))
+      .slice(0, 30);
+  }
+
+  function reportSyncError(error) {
+    console.error('Chat history sync failed:', error);
+    if (syncWarningShown) return;
+    syncWarningShown = true;
+    addAgentMessage(ilyosT('chat.syncError'));
+  }
+
+  async function pushRemoteChats(snapshot) {
+    let pendingChats = snapshot;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await fetch(`${apiBase}/api/chats`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'If-Match': remoteChatsEtag
+        },
+        body: JSON.stringify({ chats: pendingChats })
+      });
+      if (response.status === 409) {
+        const latest = await readJson(await fetch(`${apiBase}/api/chats`, { credentials: 'include' }));
+        remoteChatsEtag = latest.etag || '';
+        chats = mergeChatLists(chats, latest.chats || []);
+        pendingChats = chats;
+        localStorage.setItem(historyStorageKey, JSON.stringify(chats));
+        continue;
+      }
+      const result = await readJson(response);
+      remoteChatsEtag = result.etag || '';
+      syncWarningShown = false;
+      return;
+    }
+    throw new Error('Chat history changed too many times to sync.');
+  }
+
+  function scheduleRemoteSave() {
+    if (!remoteSyncEnabled) return;
+    clearTimeout(remoteSaveTimer);
+    const snapshot = JSON.parse(JSON.stringify(chats));
+    remoteSaveTimer = setTimeout(() => {
+      remoteSaveQueue = remoteSaveQueue
+        .then(() => pushRemoteChats(snapshot))
+        .catch(reportSyncError);
+    }, 350);
+  }
+
+  async function initializeChatHistory() {
+    await initializeAccount();
+    chats = loadChats();
+    if (authenticatedAccount) {
+      try {
+        const response = await fetch(`${apiBase}/api/chats`, { credentials: 'include' });
+        const remote = await readJson(response);
+        remoteChatsEtag = remote.etag || '';
+        remoteSyncEnabled = true;
+        chats = mergeChatLists(chats, remote.chats || []);
+        localStorage.setItem(historyStorageKey, JSON.stringify(chats));
+        scheduleRemoteSave();
+      } catch (error) {
+        setTimeout(() => reportSyncError(error), 0);
+      }
+    }
+    const newestChat = chats.find(item => !Number.isFinite(item.deletedAt));
+    if (newestChat) openChat(newestChat.id);
+    else renderChatHistory();
   }
 
   function renderChatHistory() {
     chatHistory.replaceChildren();
     chats.forEach(savedChat => {
+      if (Number.isFinite(savedChat.deletedAt)) return;
       const row = document.createElement('div');
       row.className = 'chat-history-row';
       const item = document.createElement('button');
@@ -842,7 +960,7 @@
 
   function openChat(chatId) {
     const savedChat = chats.find(item => item.id === chatId);
-    if (!savedChat) return;
+    if (!savedChat || Number.isFinite(savedChat.deletedAt)) return;
     activeChatId = savedChat.id;
     conversation = savedChat.messages;
     renderConversation();
@@ -863,7 +981,10 @@
     if (!activeChatId) return;
     if (!window.confirm(ilyosT('chat.deleteConfirm'))) return;
 
-    chats = chats.filter(savedChat => savedChat.id !== activeChatId);
+    const deletedAt = Date.now();
+    chats = chats.map(savedChat => savedChat.id === activeChatId
+      ? { id: savedChat.id, title: '', messages: [], updatedAt: deletedAt, deletedAt }
+      : savedChat);
     activeChatId = null;
     conversation = [];
     renderConversation();
@@ -1046,10 +1167,7 @@
     input.style.height = Math.min(input.scrollHeight, 120) + 'px';
   });
 
-  initializeAccount();
-  chats = loadChats();
-  if (chats.length) openChat(chats[0].id);
-  else renderChatHistory();
+  initializeChatHistory();
   initGemini();
 </script>
 <script src="./cursor.js"></script>
