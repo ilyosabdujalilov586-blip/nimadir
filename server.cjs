@@ -2,10 +2,6 @@ const { createServer } = require('node:http');
 const { readFile } = require('node:fs/promises');
 const path = require('node:path');
 const { createAi, generateContent, getLanguage, localizedError, models } = require('./netlify/functions/_shared.cjs');
-const authFunctions = {
-  '/api/auth/send-code': require('./netlify/functions/send-code.js').handler,
-  '/api/auth/verify-code': require('./netlify/functions/verify-code.js').handler
-};
 
 const root = __dirname;
 require('dotenv').config({ path: path.join(root, '.env') });
@@ -106,30 +102,6 @@ async function handleChat(request, response) {
   }
 }
 
-async function handleAuthFunction(request, response, handler) {
-  if (request.method !== 'POST') {
-    const result = await handler({ httpMethod: request.method });
-    response.writeHead(result.statusCode, result.headers);
-    response.end(result.body);
-    return;
-  }
-
-  let body;
-  try {
-    body = await readJson(request);
-  } catch {
-    sendJson(response, 400, { error: 'invalid_request' });
-    return;
-  }
-
-  const result = await handler({
-    httpMethod: request.method,
-    body: JSON.stringify(body)
-  });
-  response.writeHead(result.statusCode, result.headers);
-  response.end(result.body);
-}
-
 createServer(async (request, response) => {
   const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
   if (pathname.startsWith('/api/')) {
@@ -158,10 +130,6 @@ createServer(async (request, response) => {
   }
   if (pathname === '/api/chat' && request.method === 'POST') {
     await handleChat(request, response);
-    return;
-  }
-  if (authFunctions[pathname]) {
-    await handleAuthFunction(request, response, authFunctions[pathname]);
     return;
   }
   if (pathname.startsWith('/api/')) {

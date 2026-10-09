@@ -192,10 +192,80 @@
             box-shadow: 0 10px 24px rgba(139, 92, 246, .45);
         }
 
-        .sing-up-link:disabled {
-            cursor: wait;
-            opacity: .7;
-            transform: none;
+        .code-alert {
+            width: min(100% - 32px, 390px);
+            padding: 32px;
+            border: 1px solid rgba(192, 132, 252, .35);
+            border-radius: 24px;
+            background: linear-gradient(145deg, #171e32, #0a0d18);
+            color: var(--text);
+            text-align: center;
+            box-shadow: 0 28px 90px rgba(0, 0, 0, .65), 0 0 50px rgba(139, 92, 246, .2);
+        }
+
+        .code-alert::backdrop {
+            background: rgba(3, 5, 12, .78);
+            backdrop-filter: blur(8px);
+        }
+
+        .code-alert-icon {
+            display: grid;
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 18px;
+            place-items: center;
+            border: 1px solid rgba(192, 132, 252, .35);
+            border-radius: 18px;
+            background: rgba(139, 92, 246, .15);
+            color: #d8b4fe;
+            font-size: 1.6rem;
+        }
+
+        .code-alert h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .code-alert-message {
+            margin: 10px 0 22px;
+            color: var(--muted);
+            font-size: .9rem;
+            line-height: 1.6;
+        }
+
+        .code-alert-value {
+            margin-bottom: 22px;
+            border: 1px solid rgba(192, 132, 252, .25);
+            border-radius: 16px;
+            padding: 15px;
+            background: rgba(139, 92, 246, .09);
+            color: #e9d5ff;
+            font-size: clamp(2rem, 10vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: .32em;
+            line-height: 1;
+            text-indent: .32em;
+            user-select: all;
+        }
+
+        .code-alert-dismiss {
+            width: 100%;
+            border: 0;
+            border-radius: 13px;
+            padding: 13px 18px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6 55%, #d946ef);
+            color: #fff;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(139, 92, 246, .3);
+            transition: filter .2s ease, transform .2s ease;
+        }
+
+        .code-alert-dismiss:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
         }
 
         .google-divider {
@@ -543,9 +613,6 @@
                         <label class="email-title" for="regEmailInput" data-i18n="auth.email">Email</label>
                         <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
 
-                        <label class="email-title" for="phoneInput" data-i18n="auth.phone">Telefon raqami</label>
-                        <input id="phoneInput" class="name-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67" data-i18n-placeholder="auth.phonePlaceholder" maxlength="24" required>
-                    
                         <label class="password-title" for="regPasswordInput" data-i18n="auth.password">Parol</label>
                         <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
                     
@@ -561,8 +628,8 @@
                     <!-- Kodni tasdiqlash Formasi -->
                     <form id="verifyForm">
                         <label class="name-title" for="verifyCodeInput" data-i18n="auth.verifyCode">Tasdiqlash kodi</label>
-                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Telefoningizga SMS orqali yuborilgan 6 xonali kodni kiriting:</p>
-                        <input id="verifyCodeInput" class="name-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="6" required>
+                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Alertda ko‘rsatilgan 4 xonali kodni kiriting:</p>
+                        <input id="verifyCodeInput" class="name-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="4" required>
                         <button class="sing-up-link" type="submit" data-i18n="auth.confirmCode">Kodni tasdiqlash</button>
                     </form>
 
@@ -572,6 +639,16 @@
             </div>
         </section>
     </main>
+
+    <dialog class="code-alert" id="codeAlert" aria-labelledby="codeAlertTitle" aria-describedby="codeAlertMessage">
+        <div class="code-alert-icon" aria-hidden="true">✦</div>
+        <h2 id="codeAlertTitle" data-i18n="auth.codeAlertTitle">Tasdiqlash kodi</h2>
+        <p class="code-alert-message" id="codeAlertMessage" data-i18n="auth.codeAlertMessage">Ro‘yxatdan o‘tishni yakunlash uchun quyidagi kodni kiriting:</p>
+        <div class="code-alert-value" id="codeAlertValue" aria-live="polite"></div>
+        <form method="dialog">
+            <button class="code-alert-dismiss" type="submit" data-i18n="auth.codeAlertDismiss">Tushunarli</button>
+        </form>
+    </dialog>
 
     <script src="./cursor.js"></script>
     <script src="./language.js"></script>
@@ -647,9 +724,11 @@
         const formTitle = document.getElementById('formTitle');
         const loginError = document.getElementById('loginError');
         const authTabsContainer = document.getElementById('authTabsContainer');
+        const codeAlert = document.getElementById('codeAlert');
+        const codeAlertValue = document.getElementById('codeAlertValue');
 
         let pendingUserData = null;
-        let verificationToken = null;
+        let generatedCode = null;
         let activeAuthMessage = null;
 
         function updateAuthTitle() {
@@ -705,11 +784,6 @@
             return emailRegex.test(email);
         }
 
-        function normalizePhone(phone) {
-            const normalized = phone.trim().replace(/[\s().-]/g, '');
-            return /^\+[1-9]\d{7,14}$/.test(normalized) ? normalized : null;
-        }
-
         // 1. KIRISH QISMI
         loginForm.addEventListener('submit', event => {
             event.preventDefault();
@@ -744,22 +818,17 @@
             }, 1000);
         });
 
-        // 2. RO'YXATDAN O'TISH VA SMS KODINI YUBORISH
-        registerForm.addEventListener('submit', async event => {
+        // 2. RO'YXATDAN O'TISH VA TASDIQLASH KODINI KO'RSATISH
+        registerForm.addEventListener('submit', event => {
             event.preventDefault();
             clearAuthMessage();
 
             const name = document.getElementById('nameInput').value.trim();
             const email = document.getElementById('regEmailInput').value.trim();
             const password = document.getElementById('regPasswordInput').value;
-            const phone = normalizePhone(document.getElementById('phoneInput').value);
 
             if (!isValidEmail(email)) {
                 setAuthMessage('auth.registerEmailInvalid');
-                return;
-            }
-            if (!phone) {
-                setAuthMessage('auth.phoneInvalid');
                 return;
             }
 
@@ -769,65 +838,23 @@
                 return;
             }
 
-            const registerButton = registerForm.querySelector('button[type="submit"]');
-            registerButton.disabled = true;
-            try {
-                const response = await fetch('/api/auth/send-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        phone,
-                        language: document.getElementById('languageSelect').value
-                    })
-                });
-                const result = await response.json();
-                if (!response.ok) {
-                    const errorKeys = {
-                        invalid_phone: 'auth.phoneInvalid',
-                        sms_not_configured: 'auth.smsNotConfigured',
-                        sms_send_failed: 'auth.smsSendFailed'
-                    };
-                    setAuthMessage(errorKeys[result.error] || 'auth.smsSendFailed');
-                    return;
-                }
-                if (typeof result.verificationToken !== 'string' || !result.verificationToken) {
-                    throw new Error('SMS response did not contain a verification token.');
-                }
+            generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+            pendingUserData = { name, email, password };
+            codeAlertValue.textContent = generatedCode;
+            codeAlert.showModal();
 
-                verificationToken = result.verificationToken;
-                pendingUserData = { name, email, password, phone };
-                registerForm.classList.remove('active-form');
-                verifyForm.classList.add('active-form');
-                authTabsContainer.style.display = 'none';
-                updateAuthTitle();
-                setAuthMessage('auth.codeSent', true);
-            } catch (error) {
-                console.error('SMS tasdiqlash kodini yuborib bo\'lmadi:', error);
-                setAuthMessage('auth.smsSendFailed');
-            } finally {
-                registerButton.disabled = false;
-            }
+            registerForm.classList.remove('active-form');
+            verifyForm.classList.add('active-form');
+            authTabsContainer.style.display = 'none';
+            updateAuthTitle();
         });
 
         // 3. KODNI TASDIQLASH VA SAQLASH
-        verifyForm.addEventListener('submit', async event => {
+        verifyForm.addEventListener('submit', event => {
             event.preventDefault();
-            clearAuthMessage();
-            const code = document.getElementById('verifyCodeInput').value.trim();
-            const phone = pendingUserData?.phone;
+            const enteredCode = document.getElementById('verifyCodeInput').value.trim();
 
-            try {
-                const response = await fetch('/api/auth/verify-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, code, verificationToken })
-                });
-                const result = await response.json();
-                if (!response.ok || !result.verified) {
-                    setAuthMessage('auth.codeInvalid');
-                    return;
-                }
-
+            if (enteredCode === generatedCode) {
                 const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
                 users.push(pendingUserData);
                 localStorage.setItem('ilyosUsers', JSON.stringify(users));
@@ -838,9 +865,8 @@
                 setTimeout(() => {
                     window.location.href = './home.html';
                 }, 1000);
-            } catch (error) {
-                console.error('SMS tasdiqlash kodini tekshirib bo\'lmadi:', error);
-                setAuthMessage('auth.verifyRequestFailed');
+            } else {
+                setAuthMessage('auth.codeInvalid');
             }
         });
 
