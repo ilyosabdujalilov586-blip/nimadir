@@ -192,6 +192,12 @@
             box-shadow: 0 10px 24px rgba(139, 92, 246, .45);
         }
 
+        .sing-up-link:disabled {
+            cursor: wait;
+            opacity: .7;
+            transform: none;
+        }
+
         .google-divider {
             display: flex;
             align-items: center;
@@ -536,6 +542,9 @@
 
                         <label class="email-title" for="regEmailInput" data-i18n="auth.email">Email</label>
                         <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
+
+                        <label class="email-title" for="phoneInput" data-i18n="auth.phone">Telefon raqami</label>
+                        <input id="phoneInput" class="name-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67" data-i18n-placeholder="auth.phonePlaceholder" maxlength="24" required>
                     
                         <label class="password-title" for="regPasswordInput" data-i18n="auth.password">Parol</label>
                         <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
@@ -552,8 +561,8 @@
                     <!-- Kodni tasdiqlash Formasi -->
                     <form id="verifyForm">
                         <label class="name-title" for="verifyCodeInput" data-i18n="auth.verifyCode">Tasdiqlash kodi</label>
-                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Ekranga chiqqan 4 xonali kodni kiriting:</p>
-                        <input id="verifyCodeInput" class="name-input" type="text" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="4" required>
+                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Telefoningizga SMS orqali yuborilgan 6 xonali kodni kiriting:</p>
+                        <input id="verifyCodeInput" class="name-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="6" required>
                         <button class="sing-up-link" type="submit" data-i18n="auth.confirmCode">Kodni tasdiqlash</button>
                     </form>
 
@@ -640,7 +649,7 @@
         const authTabsContainer = document.getElementById('authTabsContainer');
 
         let pendingUserData = null;
-        let generatedCode = null;
+        let verificationToken = null;
         let activeAuthMessage = null;
 
         function updateAuthTitle() {
@@ -662,34 +671,6 @@
             activeAuthMessage = null;
             loginError.textContent = '';
             loginError.className = 'login-error';
-        }
-
-        function showCodeNotification(code) {
-            if (!('Notification' in window)) return;
-
-            const notify = () => {
-                try {
-                    new Notification('ILYOS AI', {
-                        body: ilyosT('auth.codeAlert') + code,
-                        icon: './favicon.svg',
-                        tag: 'ilyos-verification-code'
-                    });
-                } catch (error) {
-                    console.error('Tasdiqlash kodi bildirishnomasini ko\'rsatib bo\'lmadi:', error);
-                }
-            };
-
-            if (Notification.permission === 'granted') {
-                notify();
-            } else if (Notification.permission === 'default') {
-                Notification.requestPermission()
-                    .then(permission => {
-                        if (permission === 'granted') notify();
-                    })
-                    .catch(error => {
-                        console.error('Bildirishnoma ruxsatini so\'rashda xatolik:', error);
-                    });
-            }
         }
 
         window.addEventListener('ilyoslanguagechange', () => {
@@ -722,6 +703,11 @@
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
+        }
+
+        function normalizePhone(phone) {
+            const normalized = phone.trim().replace(/[\s().-]/g, '');
+            return /^\+[1-9]\d{7,14}$/.test(normalized) ? normalized : null;
         }
 
         // 1. KIRISH QISMI
@@ -758,17 +744,22 @@
             }, 1000);
         });
 
-        // 2. RO'YXATDAN O'TISH VA TASDIQLASH KODINI KO'RSATISH
-        registerForm.addEventListener('submit', event => {
+        // 2. RO'YXATDAN O'TISH VA SMS KODINI YUBORISH
+        registerForm.addEventListener('submit', async event => {
             event.preventDefault();
             clearAuthMessage();
 
             const name = document.getElementById('nameInput').value.trim();
             const email = document.getElementById('regEmailInput').value.trim();
             const password = document.getElementById('regPasswordInput').value;
+            const phone = normalizePhone(document.getElementById('phoneInput').value);
 
             if (!isValidEmail(email)) {
                 setAuthMessage('auth.registerEmailInvalid');
+                return;
+            }
+            if (!phone) {
+                setAuthMessage('auth.phoneInvalid');
                 return;
             }
 
@@ -778,25 +769,65 @@
                 return;
             }
 
-            // 4 xonali kod генерация qilish
-            generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
-            pendingUserData = { name, email, password };
+            const registerButton = registerForm.querySelector('button[type="submit"]');
+            registerButton.disabled = true;
+            try {
+                const response = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone,
+                        language: document.getElementById('languageSelect').value
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    const errorKeys = {
+                        invalid_phone: 'auth.phoneInvalid',
+                        sms_not_configured: 'auth.smsNotConfigured',
+                        sms_send_failed: 'auth.smsSendFailed'
+                    };
+                    setAuthMessage(errorKeys[result.error] || 'auth.smsSendFailed');
+                    return;
+                }
+                if (typeof result.verificationToken !== 'string' || !result.verificationToken) {
+                    throw new Error('SMS response did not contain a verification token.');
+                }
 
-            showCodeNotification(generatedCode);
-
-            registerForm.classList.remove('active-form');
-            verifyForm.classList.add('active-form');
-            authTabsContainer.style.display = 'none';
-            updateAuthTitle();
-            setAuthMessage('auth.codeDisplayed', true, { code: generatedCode });
+                verificationToken = result.verificationToken;
+                pendingUserData = { name, email, password, phone };
+                registerForm.classList.remove('active-form');
+                verifyForm.classList.add('active-form');
+                authTabsContainer.style.display = 'none';
+                updateAuthTitle();
+                setAuthMessage('auth.codeSent', true);
+            } catch (error) {
+                console.error('SMS tasdiqlash kodini yuborib bo\'lmadi:', error);
+                setAuthMessage('auth.smsSendFailed');
+            } finally {
+                registerButton.disabled = false;
+            }
         });
 
         // 3. KODNI TASDIQLASH VA SAQLASH
-        verifyForm.addEventListener('submit', event => {
+        verifyForm.addEventListener('submit', async event => {
             event.preventDefault();
-            const enteredCode = document.getElementById('verifyCodeInput').value.trim();
+            clearAuthMessage();
+            const code = document.getElementById('verifyCodeInput').value.trim();
+            const phone = pendingUserData?.phone;
 
-            if (enteredCode === generatedCode) {
+            try {
+                const response = await fetch('/api/auth/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, code, verificationToken })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.verified) {
+                    setAuthMessage('auth.codeInvalid');
+                    return;
+                }
+
                 const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
                 users.push(pendingUserData);
                 localStorage.setItem('ilyosUsers', JSON.stringify(users));
@@ -807,8 +838,9 @@
                 setTimeout(() => {
                     window.location.href = './home.html';
                 }, 1000);
-            } else {
-                setAuthMessage('auth.codeInvalid');
+            } catch (error) {
+                console.error('SMS tasdiqlash kodini tekshirib bo\'lmadi:', error);
+                setAuthMessage('auth.verifyRequestFailed');
             }
         });
 

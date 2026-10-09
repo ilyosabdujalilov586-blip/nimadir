@@ -17,3 +17,13 @@
   from = "/api/chat"
   to = "/.netlify/functions/chat"
   status = 200
+
+[[redirects]]
+  from = "/api/auth/send-code"
+  to = "/.netlify/functions/send-code"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/verify-code"
+  to = "/.netlify/functions/verify-code"
+  status = 200
