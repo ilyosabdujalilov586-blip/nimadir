@@ -275,20 +275,40 @@
         }
 
         .connection-spinner {
+            position: relative;
+            display: grid;
+            place-items: center;
             width: 76px;
             height: 76px;
+        }
+
+        .connection-spinner::before {
+            position: absolute;
+            inset: 0;
             border: 4px solid rgba(192, 132, 252, .2);
             border-top-color: var(--purple);
             border-radius: 50%;
             animation: connectionSpin .9s linear infinite;
+            content: "";
         }
 
         .connection-logo {
-            margin: -72px 0 0;
+            position: relative;
+            margin: 0;
             color: #fff;
-            font-size: 1.05rem;
+            font-size: .75rem;
             font-weight: 800;
-            letter-spacing: .08em;
+            letter-spacing: .02em;
+            white-space: nowrap;
+        }
+
+        .connection-screen.connection-failed .connection-spinner::before {
+            animation-play-state: paused;
+            opacity: .45;
+        }
+
+        .connection-spinner[hidden] {
+            display: none;
         }
 
         .connection-message {
@@ -314,11 +334,6 @@
             background: rgba(139, 92, 246, .32);
         }
 
-        .connection-screen.connection-failed .connection-spinner {
-            animation-play-state: paused;
-            opacity: .45;
-        }
-
         @keyframes connectionSpin {
             to { transform: rotate(360deg); }
         }
@@ -336,7 +351,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .connection-screen::before,
-            .connection-spinner {
+            .connection-spinner::before {
                 animation-duration: 3s;
             }
         }
@@ -401,8 +416,9 @@
 
     <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
         <div class="connection-content">
-            <div class="connection-spinner" id="connectionSpinner" aria-hidden="true"></div>
-            <p class="connection-logo">ILYOS.AI</p>
+            <div class="connection-spinner" id="connectionSpinner" aria-hidden="true">
+                <span class="connection-logo">ILYOS.AI</span>
+            </div>
             <p class="connection-message" id="connectionMessage" hidden>Internet ishlamadi. Ulanishni tekshirib, qayta urinib ko'ring.</p>
             <button class="connection-retry" id="connectionRetry" type="button" hidden>Qayta tekshirish</button>
         </div>
