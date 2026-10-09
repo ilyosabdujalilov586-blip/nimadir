@@ -81,7 +81,9 @@
         }
 
         .auth-controls {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
         }
 
         .auth-tabs {
@@ -89,7 +91,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 4px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             border: 1px solid var(--line);
         }
 
@@ -100,9 +102,9 @@
             border: none;
             color: var(--muted);
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 700;
-            padding: 10px 6px;
+            padding: 12px 6px;
             cursor: pointer;
             border-radius: 9px;
             line-height: 1.2;
@@ -254,13 +256,8 @@
         }
 
         .auth-language {
-            position: fixed;
-            z-index: 10001;
-            top: 18px;
-            right: 18px;
-            width: 116px;
+            width: max-content;
             height: 44px;
-            min-width: 0;
             border: 1px solid var(--line);
             border-radius: 999px;
             padding: 8px 28px 8px 13px;
@@ -269,6 +266,7 @@
             font: inherit;
             font-size: .84rem;
             cursor: pointer;
+            align-self: flex-start;
         }
 
         .auth-language option {
@@ -406,27 +404,21 @@
 
         @media (max-width: 520px) {
             .auth-language {
-                position: static;
-                flex: 0 0 88px;
-                width: 88px;
+                width: max-content;
                 height: 40px;
                 padding: 6px 20px 6px 9px;
                 font-size: .72rem;
             }
             .auth-controls {
-                display: flex;
-                align-items: stretch;
-                gap: 8px;
+                gap: 0px;
                 margin-bottom: 18px;
             }
             .auth-tabs {
-                flex: 1;
-                min-width: 0;
-                margin-bottom: 0;
+                margin-bottom: 12px;
             }
             .auth-tab {
-                padding: 8px 5px;
-                font-size: .78rem;
+                padding: 10px 5px;
+                font-size: .85rem;
                 overflow-wrap: anywhere;
             }
             .parent {
@@ -459,22 +451,20 @@
                 padding: 22px 14px 18px;
             }
             .auth-controls {
-                gap: 6px;
+                gap: 0px;
             }
             .auth-language {
-                flex-basis: 76px;
-                width: 76px;
                 padding-right: 16px;
                 padding-left: 7px;
                 font-size: .65rem;
             }
             .auth-tabs {
-                gap: 6px;
                 padding: 3px;
+                margin-bottom: 10px;
             }
             .auth-tab {
-                font-size: 0.72rem;
-                padding: 7px 6px;
+                font-size: 0.75rem;
+                padding: 8px 6px;
             }
             .sing-up-title {
                 font-size: 1.35rem;
@@ -509,15 +499,15 @@
                     </div>
 
                     <div class="auth-controls">
+                        <div class="auth-tabs" id="authTabsContainer">
+                            <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
+                            <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
+                        </div>
                         <select class="auth-language" id="languageSelect" aria-label="Til">
                             <option value="uz">O‘zbekcha</option>
                             <option value="en">English</option>
                             <option value="ru">Русский</option>
                         </select>
-                        <div class="auth-tabs" id="authTabsContainer">
-                            <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
-                            <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
-                        </div>
                     </div>
 
                     <h1 class="sing-up-title" id="formTitle" data-i18n="auth.loginTitle">Tizimga kirish</h1>
