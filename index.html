@@ -690,10 +690,12 @@
         });
 
         // 4. GOOGLE ORQALI KIRISH
+        const googleClientId = '499001615599-oiaag765cv1uc43no0t34p90krs86kt3.apps.googleusercontent.com';
+
         window.onload = function () {
             if (typeof google !== 'undefined') {
                 google.accounts.id.initialize({
-                    client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+                    client_id: googleClientId,
                     callback: handleGoogleResponse
                 });
             }
@@ -740,7 +742,7 @@
                     if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                         try {
                             const client = google.accounts.oauth2.initTokenClient({
-                                client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+                                client_id: googleClientId,
                                 scope: 'email profile',
                                 callback: (tokenResponse) => {
                                     if (tokenResponse && tokenResponse.access_token) {
