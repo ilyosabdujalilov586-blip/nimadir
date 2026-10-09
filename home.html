@@ -135,14 +135,15 @@
       background: var(--gradient-brand-hover);
     }
     .language-select {
-      min-width: 112px;
-      padding: 9px 12px;
+      width: 96px;
+      min-width: 0;
+      padding: 7px 22px 7px 10px;
       border: 1px solid var(--line-glow);
       border-radius: 100px;
       background: var(--panel);
       color: var(--ink);
       font: inherit;
-      font-size: .88rem;
+      font-size: .8rem;
       cursor: pointer;
     }
     .language-select option { background: #101526; color: #fff; }
@@ -438,7 +439,7 @@
       .nav-links.is-active a:nth-child(3) { animation-delay: 0.08s; }
       .nav-links.is-active a:nth-child(4) { animation-delay: 0.12s; }
       .nav-links.is-active a:nth-child(5) { animation-delay: 0.16s; }
-      .nav-links .language-select { width: 100%; padding: 14px 16px; border-radius: 14px; font-size: 1rem; }
+      .nav-links .language-select { width: 96px; min-width: 0; align-self: flex-start; padding: 7px 22px 7px 10px; border-radius: 100px; font-size: .8rem; }
 
       .menu-backdrop {
         background: rgba(7, 9, 19, 0.42);
@@ -602,21 +603,27 @@
     .account-badge {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      max-width: 132px;
+      min-width: 0;
       background: rgba(139, 92, 246, 0.15);
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 3px 9px 3px 4px;
+      border-radius: 999px;
       border: 1px solid rgba(139, 92, 246, 0.3);
       cursor: pointer;
     }
     .account-avatar {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
       border-radius: 50%;
     }
     .account-name {
-      font-size: 14px;
-      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 600;
     }
   </style>
 </head>

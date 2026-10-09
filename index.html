@@ -61,6 +61,29 @@
             box-shadow: 0 24px 70px rgba(0, 0, 0, .65);
         }
 
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .auth-brand img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .auth-brand span {
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .auth-controls {
+            display: block;
+        }
+
         .auth-tabs {
             display: flex;
             background: rgba(255, 255, 255, 0.05);
@@ -72,15 +95,17 @@
 
         .auth-tab {
             flex: 1;
+            min-width: 0;
             background: transparent;
             border: none;
             color: var(--muted);
             font-family: inherit;
             font-size: 0.9rem;
             font-weight: 700;
-            padding: 10px;
+            padding: 10px 6px;
             cursor: pointer;
             border-radius: 9px;
+            line-height: 1.2;
             transition: all 0.2s ease;
         }
 
@@ -233,13 +258,16 @@
             z-index: 10001;
             top: 18px;
             right: 18px;
-            min-width: 112px;
+            width: 116px;
+            height: 44px;
+            min-width: 0;
             border: 1px solid var(--line);
-            border-radius: 10px;
-            padding: 9px 12px;
+            border-radius: 999px;
+            padding: 8px 28px 8px 13px;
             background: rgba(16, 21, 36, .96);
             color: var(--text);
             font: inherit;
+            font-size: .84rem;
             cursor: pointer;
         }
 
@@ -378,8 +406,28 @@
 
         @media (max-width: 520px) {
             .auth-language {
-                top: 12px;
-                right: 12px;
+                position: static;
+                flex: 0 0 88px;
+                width: 88px;
+                height: 40px;
+                padding: 6px 20px 6px 9px;
+                font-size: .72rem;
+            }
+            .auth-controls {
+                display: flex;
+                align-items: stretch;
+                gap: 8px;
+                margin-bottom: 18px;
+            }
+            .auth-tabs {
+                flex: 1;
+                min-width: 0;
+                margin-bottom: 0;
+            }
+            .auth-tab {
+                padding: 8px 5px;
+                font-size: .78rem;
+                overflow-wrap: anywhere;
             }
             .parent {
                 padding: 16px 12px;
@@ -392,13 +440,6 @@
             .sing-up-title {
                 font-size: 1.5rem;
                 margin-bottom: 16px;
-            }
-            .auth-tabs {
-                margin-bottom: 18px;
-            }
-            .auth-tab {
-                padding: 8px;
-                font-size: 0.85rem;
             }
             .email-input, .password-input, .name-input {
                 padding: 12px 14px;
@@ -417,12 +458,22 @@
             .sing-up {
                 padding: 22px 14px 18px;
             }
+            .auth-controls {
+                gap: 6px;
+            }
+            .auth-language {
+                flex-basis: 76px;
+                width: 76px;
+                padding-right: 16px;
+                padding-left: 7px;
+                font-size: .65rem;
+            }
             .auth-tabs {
                 gap: 6px;
                 padding: 3px;
             }
             .auth-tab {
-                font-size: 0.8rem;
+                font-size: 0.72rem;
                 padding: 7px 6px;
             }
             .sing-up-title {
@@ -438,12 +489,6 @@
 
     <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
-    <select class="auth-language" id="languageSelect" aria-label="Til">
-        <option value="uz">O‘zbekcha</option>
-        <option value="en">English</option>
-        <option value="ru">Русский</option>
-    </select>
-
     <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
         <div class="connection-content">
             <div class="connection-spinner" id="connectionSpinner" aria-hidden="true">
@@ -458,11 +503,21 @@
         <section>
             <div class="parent">
                 <div class="sing-up">
-                    
-                    <!-- Tablar -->
-                    <div class="auth-tabs" id="authTabsContainer">
-                        <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
-                        <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
+                    <div class="auth-brand" aria-label="Ilyos AI">
+                        <img src="favicon.svg" alt="">
+                        <span>ILYOS AI</span>
+                    </div>
+
+                    <div class="auth-controls">
+                        <select class="auth-language" id="languageSelect" aria-label="Til">
+                            <option value="uz">O‘zbekcha</option>
+                            <option value="en">English</option>
+                            <option value="ru">Русский</option>
+                        </select>
+                        <div class="auth-tabs" id="authTabsContainer">
+                            <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
+                            <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
+                        </div>
                     </div>
 
                     <h1 class="sing-up-title" id="formTitle" data-i18n="auth.loginTitle">Tizimga kirish</h1>
