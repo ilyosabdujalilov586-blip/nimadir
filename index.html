@@ -224,10 +224,121 @@
         .login-error.success { color: #4ade80; }
         .login-error.is-visible { animation: errorShake .3s ease; }
 
+        body.connection-pending {
+            overflow: hidden;
+        }
+
+        .connection-screen {
+            position: fixed;
+            z-index: 10000;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 45%, rgba(139, 92, 246, .18), transparent 38%),
+                #080B14;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .45s ease, visibility .45s ease;
+        }
+
+        .connection-screen.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .connection-screen::before {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            content: "ILYOS.AI";
+            color: rgba(192, 132, 252, .08);
+            font-size: clamp(4rem, 16vw, 14rem);
+            font-weight: 800;
+            letter-spacing: .08em;
+            white-space: nowrap;
+            animation: backgroundBrand 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .connection-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            justify-items: center;
+            gap: 20px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .connection-spinner {
+            width: 76px;
+            height: 76px;
+            border: 4px solid rgba(192, 132, 252, .2);
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: connectionSpin .9s linear infinite;
+        }
+
+        .connection-logo {
+            margin: -72px 0 0;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .connection-message {
+            max-width: 320px;
+            margin: 12px 0 0;
+            color: #ffb4a9;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .connection-retry {
+            border: 1px solid var(--purple-strong);
+            border-radius: 10px;
+            padding: 10px 18px;
+            background: rgba(139, 92, 246, .18);
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .connection-retry:hover {
+            background: rgba(139, 92, 246, .32);
+        }
+
+        .connection-screen.connection-failed .connection-spinner {
+            animation-play-state: paused;
+            opacity: .45;
+        }
+
+        @keyframes connectionSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes backgroundBrand {
+            from { transform: translateX(-3%) scale(.96); opacity: .55; }
+            to { transform: translateX(3%) scale(1.04); opacity: 1; }
+        }
+
         @keyframes errorShake {
             0%, 100% { transform: translateX(0); }
             30% { transform: translateX(-6px); }
             70% { transform: translateX(6px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .connection-screen::before,
+            .connection-spinner {
+                animation-duration: 3s;
+            }
         }
 
         @media (max-width: 520px) {
@@ -288,7 +399,16 @@
 
     <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
-    <main>
+    <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
+        <div class="connection-content">
+            <div class="connection-spinner" id="connectionSpinner" aria-hidden="true"></div>
+            <p class="connection-logo">ILYOS.AI</p>
+            <p class="connection-message" id="connectionMessage" hidden>Internet ishlamadi. Ulanishni tekshirib, qayta urinib ko'ring.</p>
+            <button class="connection-retry" id="connectionRetry" type="button" hidden>Qayta tekshirish</button>
+        </div>
+    </div>
+
+    <main inert aria-hidden="true">
         <section>
             <div class="parent">
                 <div class="sing-up">
@@ -354,6 +474,69 @@
     </main>
 
     <script src="./cursor.js"></script>
+    <script>
+        (() => {
+            const screen = document.getElementById('connectionScreen');
+            const message = document.getElementById('connectionMessage');
+            const retryButton = document.getElementById('connectionRetry');
+            const spinner = document.getElementById('connectionSpinner');
+            const main = document.querySelector('main');
+            let timeoutId;
+            let isChecking = false;
+            let isUnlocked = false;
+
+            document.body.classList.add('connection-pending');
+
+            function showOfflineMessage() {
+                screen.classList.add('connection-failed');
+                spinner.hidden = true;
+                message.hidden = false;
+                retryButton.hidden = false;
+            }
+
+            async function checkConnection() {
+                if (isChecking || isUnlocked || !navigator.onLine) return;
+                isChecking = true;
+                const controller = new AbortController();
+                const requestTimeout = setTimeout(() => controller.abort(), 4000);
+
+                try {
+                    await fetch('https://www.gstatic.com/generate_204', {
+                        mode: 'no-cors',
+                        cache: 'no-store',
+                        signal: controller.signal
+                    });
+
+                    isUnlocked = true;
+                    clearTimeout(timeoutId);
+                    main.removeAttribute('inert');
+                    main.removeAttribute('aria-hidden');
+                    document.body.classList.remove('connection-pending');
+                    screen.classList.add('is-hidden');
+                    setTimeout(() => screen.remove(), 500);
+                } catch {
+                    // Keep the page blocked and show the failure message at the 4-second mark.
+                } finally {
+                    clearTimeout(requestTimeout);
+                    isChecking = false;
+                }
+            }
+
+            function beginCheck() {
+                clearTimeout(timeoutId);
+                screen.classList.remove('connection-failed');
+                message.hidden = true;
+                retryButton.hidden = true;
+                spinner.hidden = false;
+                timeoutId = setTimeout(showOfflineMessage, 4000);
+                checkConnection();
+            }
+
+            retryButton.addEventListener('click', beginCheck);
+            window.addEventListener('online', checkConnection);
+            beginCheck();
+        })();
+    </script>
     <script>
         const tabLogin = document.getElementById('tabLogin');
         const tabRegister = document.getElementById('tabRegister');
