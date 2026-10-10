@@ -1,6 +1,6 @@
 const { createHash, createHmac, randomBytes, scrypt, timingSafeEqual } = require('node:crypto');
 const { promisify } = require('node:util');
-const { getStore } = require('@netlify/blobs');
+const { connectLambda, getStore } = require('@netlify/blobs');
 
 const scryptAsync = promisify(scrypt);
 const SESSION_COOKIE = 'ilyos_session';
@@ -14,6 +14,10 @@ function getStoreForSite(name) {
     options.token = process.env.NETLIFY_AUTH_TOKEN;
   }
   return getStore(name, options);
+}
+
+function connectBlobs(event) {
+  if (typeof event.blobs === 'string' && event.blobs) connectLambda(event);
 }
 
 function getAccounts() {
@@ -247,6 +251,7 @@ module.exports = {
   accountKey,
   authenticateWithGoogle,
   chatKey,
+  connectBlobs,
   createAccount,
   getAccount,
   getAccounts,
