@@ -20,7 +20,7 @@ exports.handler = async event => {
     const store = getChats();
     const key = chatKey(session.email);
     if (event.httpMethod === 'GET') {
-      const saved = await store.getWithMetadata(key, { type: 'json' });
+      const saved = await store.getWithMetadata(key, { type: 'json', consistency: 'strong' });
       return jsonResponse(200, {
         chats: saved?.data || [],
         etag: saved?.etag || null
@@ -35,7 +35,7 @@ exports.handler = async event => {
     }
     if (!validateChats(body?.chats)) return jsonResponse(400, { error: 'invalid_chats' });
 
-    const current = await store.getMetadata(key);
+    const current = await store.getMetadata(key, { consistency: 'strong' });
     const expectedEtag = event.headers?.['if-match'] || event.headers?.['If-Match'] || '';
     if ((current?.etag || '') !== expectedEtag) {
       return jsonResponse(409, { error: 'chat_conflict' });

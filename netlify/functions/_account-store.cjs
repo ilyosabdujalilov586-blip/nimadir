@@ -8,9 +8,8 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getStoreForSite(name) {
-  const hasApiCredentials = process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN;
-  const options = { consistency: hasApiCredentials ? 'strong' : 'eventual' };
-  if (hasApiCredentials) {
+  const options = { consistency: 'strong' };
+  if (process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN) {
     options.siteID = process.env.NETLIFY_SITE_ID;
     options.token = process.env.NETLIFY_AUTH_TOKEN;
   }
