@@ -2,6 +2,7 @@ const { jsonResponse } = require('./_shared.cjs');
 const {
   authenticateWithGoogle,
   createAccount,
+  connectBlobs,
   getAccount,
   login,
   migrateLegacyAccount,
@@ -52,6 +53,7 @@ exports.handler = async event => {
   }
 
   try {
+    connectBlobs(event);
     if (method === 'GET' || body.action === 'session') {
       const session = await readSession(event);
       if (!session) return jsonResponse(401, { error: 'not_authenticated' }, { 'Cache-Control': 'no-store' });

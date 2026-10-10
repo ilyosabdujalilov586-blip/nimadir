@@ -1,5 +1,5 @@
 const { jsonResponse } = require('./_shared.cjs');
-const { chatKey, getChats, parseBody, readSession, validateChats } = require('./_account-store.cjs');
+const { chatKey, connectBlobs, getChats, parseBody, readSession, validateChats } = require('./_account-store.cjs');
 
 exports.handler = async event => {
   if (!['GET', 'PUT'].includes(event.httpMethod)) {
@@ -8,6 +8,7 @@ exports.handler = async event => {
 
   let session;
   try {
+    connectBlobs(event);
     session = await readSession(event);
   } catch (error) {
     console.error('Chat session configuration failed:', error.code);
