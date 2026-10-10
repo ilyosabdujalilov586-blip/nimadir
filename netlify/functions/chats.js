@@ -8,7 +8,7 @@ exports.handler = async event => {
 
   let session;
   try {
-    session = await readSession(event);
+    session = readSession(event);
   } catch (error) {
     console.error('Chat session configuration failed:', error.code);
     return jsonResponse(503, { error: 'auth_not_configured' });
