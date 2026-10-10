@@ -614,7 +614,7 @@
                         <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
 
                         <label class="password-title" for="regPasswordInput" data-i18n="auth.password">Parol</label>
-                        <input id="regPasswordInput" class="password-input" type="password" minlength="8" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
+                        <input id="regPasswordInput" class="password-input" type="password" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
                     
                         <button class="sing-up-link" type="submit" data-i18n="auth.register">Ro'yxatdan o'tish</button>
 
@@ -730,8 +730,6 @@
         let pendingUserData = null;
         let generatedCode = null;
         let activeAuthMessage = null;
-        const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-        const accountApiBase = isLocalHost ? `http://${window.location.hostname}:5508` : '';
 
         function updateAuthTitle() {
             const titleKey = verifyForm.classList.contains('active-form')
@@ -786,101 +784,8 @@
             return emailRegex.test(email);
         }
 
-        function setSignedInUser(user, messageKey = 'auth.loginSuccess') {
-            localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
-            setAuthMessage(messageKey, true);
-            setTimeout(() => {
-                window.location.href = './home.html';
-            }, 700);
-        }
-
-        async function requestAccount(action, data) {
-            const response = await fetch(`${accountApiBase}/api/account`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...data })
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                const error = new Error(result.error || 'account_request_failed');
-                error.code = result.error;
-                throw error;
-            }
-            return result.user;
-        }
-
-        function showAccountError(error, fallbackKey = 'auth.cloudUnavailable') {
-            console.error('Account request failed:', error);
-            const messageKeys = {
-                account_not_found: 'auth.noAccount',
-                email_exists: 'auth.duplicateEmail',
-                invalid_account: 'auth.invalidAccount',
-                invalid_credentials: 'auth.badPassword',
-                auth_not_configured: 'auth.cloudUnavailable',
-                google_not_configured: 'auth.cloudUnavailable',
-                invalid_google_credential: 'auth.googleError'
-            };
-            setAuthMessage(messageKeys[error.code] || fallbackKey);
-        }
-
-        function readLegacyUsers() {
-            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
-            return Array.isArray(users) ? users : [];
-        }
-
-        async function signIn(email, password) {
-            try {
-                const user = await requestAccount('login', { email, password });
-                setSignedInUser(user);
-            } catch (error) {
-                if (error.code !== 'account_not_found') {
-                    showAccountError(error);
-                    return;
-                }
-
-                const legacyUser = readLegacyUsers().find(user =>
-                    typeof user.email === 'string' &&
-                    user.email.trim().toLowerCase() === email.trim().toLowerCase()
-                );
-                if (!legacyUser) {
-                    showAccountError(error);
-                    return;
-                }
-                if (legacyUser.password !== password || legacyUser.password === 'GOOGLE_AUTH_USER') {
-                    setAuthMessage('auth.badPassword');
-                    return;
-                }
-
-                try {
-                    const user = await requestAccount('migrate', {
-                        name: legacyUser.name,
-                        email: legacyUser.email,
-                        password
-                    });
-                    const remainingUsers = readLegacyUsers().filter(item =>
-                        typeof item.email === 'string' &&
-                        item.email.trim().toLowerCase() !== email.trim().toLowerCase()
-                    );
-                    localStorage.setItem('ilyosUsers', JSON.stringify(remainingUsers));
-                    setSignedInUser(user);
-                } catch (migrationError) {
-                    showAccountError(migrationError);
-                }
-            }
-        }
-
-        async function signInWithGoogle(credential) {
-            try {
-                const user = await requestAccount('google', credential);
-                setSignedInUser(user);
-            } catch (error) {
-                showAccountError(error, 'auth.googleError');
-            }
-        }
-
         // 1. KIRISH QISMI
-        loginForm.addEventListener('submit', async event => {
+        loginForm.addEventListener('submit', event => {
             event.preventDefault();
             clearAuthMessage();
 
@@ -892,7 +797,25 @@
                 return;
             }
 
-            await signIn(email, password);
+            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+            const foundUser = users.find(u => u.email === email);
+
+            if (!foundUser) {
+                setAuthMessage('auth.noAccount');
+                return;
+            }
+
+            if (foundUser.password !== password) {
+                setAuthMessage('auth.badPassword');
+                return;
+            }
+
+            localStorage.setItem('ilyosActiveUser', JSON.stringify(foundUser));
+            setAuthMessage('auth.loginSuccess', true);
+
+            setTimeout(() => {
+                window.location.href = './home.html';
+            }, 1000);
         });
 
         // 2. RO'YXATDAN O'TISH VA TASDIQLASH KODINI KO'RSATISH
@@ -909,8 +832,9 @@
                 return;
             }
 
-            if (password.length < 8) {
-                setAuthMessage('auth.passwordTooShort');
+            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+            if (users.some(u => u.email === email)) {
+                setAuthMessage('auth.duplicateEmail');
                 return;
             }
 
@@ -926,17 +850,21 @@
         });
 
         // 3. KODNI TASDIQLASH VA SAQLASH
-        verifyForm.addEventListener('submit', async event => {
+        verifyForm.addEventListener('submit', event => {
             event.preventDefault();
             const enteredCode = document.getElementById('verifyCodeInput').value.trim();
 
             if (enteredCode === generatedCode) {
-                try {
-                    const user = await requestAccount('register', pendingUserData);
-                    setSignedInUser(user, 'auth.registerSuccess');
-                } catch (error) {
-                    showAccountError(error);
-                }
+                const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                users.push(pendingUserData);
+                localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                localStorage.setItem('ilyosActiveUser', JSON.stringify(pendingUserData));
+
+                setAuthMessage('auth.registerSuccess', true);
+
+                setTimeout(() => {
+                    window.location.href = './home.html';
+                }, 1000);
             } else {
                 setAuthMessage('auth.codeInvalid');
             }
@@ -945,21 +873,46 @@
         // 4. GOOGLE ORQALI KIRISH
         const googleClientId = '499001615599-oiaag765cv1uc43no0t34p90krs86kt3.apps.googleusercontent.com';
 
-        window.addEventListener('load', () => {
+        window.onload = function () {
             if (typeof google !== 'undefined') {
                 google.accounts.id.initialize({
                     client_id: googleClientId,
                     callback: handleGoogleResponse
                 });
             }
-        });
+        };
 
         function handleGoogleResponse(response) {
-            if (typeof response?.credential !== 'string') {
+            try {
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const googleUser = JSON.parse(jsonPayload);
+                const email = googleUser.email;
+                const name = googleUser.name;
+
+                const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                let user = users.find(u => u.email === email);
+                
+                if (!user) {
+                    user = { name: name, email: email, password: 'GOOGLE_AUTH_USER' };
+                    users.push(user);
+                    localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                }
+
+                localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
+                setAuthMessage('auth.googleSuccess', true);
+
+                setTimeout(() => {
+                    window.location.href = './home.html';
+                }, 1000);
+
+            } catch (error) {
                 setAuthMessage('auth.googleError');
-                return;
             }
-            signInWithGoogle({ idToken: response.credential });
         }
 
         function triggerGoogleLogin() {
@@ -971,10 +924,31 @@
                                 client_id: googleClientId,
                                 scope: 'email profile',
                                 callback: (tokenResponse) => {
-                                    if (tokenResponse?.access_token) {
-                                        signInWithGoogle({ accessToken: tokenResponse.access_token });
-                                    } else {
-                                        setAuthMessage('auth.googleError');
+                                    if (tokenResponse && tokenResponse.access_token) {
+                                        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                                            headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
+                                        })
+                                        .then(res => res.json())
+                                        .then(googleUser => {
+                                            const email = googleUser.email;
+                                            const name = googleUser.name;
+
+                                            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
+                                            let user = users.find(u => u.email === email);
+                                            
+                                            if (!user) {
+                                                user = { name: name, email: email, password: 'GOOGLE_AUTH_USER' };
+                                                users.push(user);
+                                                localStorage.setItem('ilyosUsers', JSON.stringify(users));
+                                            }
+
+                                            localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
+                                            setAuthMessage('auth.googleSuccess', true);
+
+                                            setTimeout(() => {
+                                                window.location.href = './home.html';
+                                            }, 1000);
+                                        });
                                     }
                                 }
                             });

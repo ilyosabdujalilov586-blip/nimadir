@@ -62,10 +62,10 @@ function localizedError(language, key) {
   return messages[getLanguage(language)][key];
 }
 
-function jsonResponse(statusCode, body, headers = {}) {
+function jsonResponse(statusCode, body) {
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify(body)
   };
 }

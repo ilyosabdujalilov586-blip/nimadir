@@ -2,8 +2,6 @@ const { createServer } = require('node:http');
 const { readFile } = require('node:fs/promises');
 const path = require('node:path');
 const { createAi, generateContent, getLanguage, localizedError, models } = require('./netlify/functions/_shared.cjs');
-const { handler: accountHandler } = require('./netlify/functions/account.js');
-const { handler: chatsHandler } = require('./netlify/functions/chats.js');
 
 const root = __dirname;
 require('dotenv').config({ path: path.join(root, '.env') });
@@ -42,43 +40,18 @@ function setApiCorsHeaders(request, response) {
       !['localhost', '127.0.0.1'].includes(parsedOrigin.hostname)) return;
 
   response.setHeader('Access-Control-Allow-Origin', origin);
-  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, If-Match');
-  response.setHeader('Access-Control-Allow-Credentials', 'true');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   response.setHeader('Vary', 'Origin');
 }
 
-async function readJson(request, maxBytes = 32_768) {
+async function readJson(request) {
   let body = '';
   for await (const chunk of request) {
     body += chunk;
-    if (Buffer.byteLength(body, 'utf8') > maxBytes) throw new Error('Request body is too large');
+    if (body.length > 32_768) throw new Error('Request body is too large');
   }
   return JSON.parse(body);
-}
-
-async function handleAccountApi(request, response, handler) {
-  let body = '';
-  if (request.method !== 'GET') {
-    try {
-      body = JSON.stringify(await readJson(request, 1_048_576));
-    } catch {
-      sendJson(response, 400, { error: 'invalid_request' });
-      return;
-    }
-  }
-
-  const result = await handler({
-    httpMethod: request.method,
-    headers: {
-      cookie: request.headers.cookie || '',
-      'x-forwarded-proto': request.headers['x-forwarded-proto'] ||
-        (request.socket.encrypted ? 'https' : 'http')
-    },
-    body
-  });
-  response.writeHead(result.statusCode, result.headers);
-  response.end(result.body);
 }
 
 async function handleChat(request, response) {
@@ -157,14 +130,6 @@ createServer(async (request, response) => {
   }
   if (pathname === '/api/chat' && request.method === 'POST') {
     await handleChat(request, response);
-    return;
-  }
-  if (pathname === '/api/account' && ['GET', 'POST'].includes(request.method)) {
-    await handleAccountApi(request, response, accountHandler);
-    return;
-  }
-  if (pathname === '/api/chats' && ['GET', 'PUT'].includes(request.method)) {
-    await handleAccountApi(request, response, chatsHandler);
     return;
   }
   if (pathname.startsWith('/api/')) {
