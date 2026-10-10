@@ -1,10 +1,13 @@
-const { createHash, createHmac, randomBytes, scrypt, timingSafeEqual } = require('node:crypto');
+const { createHash, createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } = require('node:crypto');
 const { promisify } = require('node:util');
 const { getStore } = require('@netlify/blobs');
 
 const scryptAsync = promisify(scrypt);
 const SESSION_COOKIE = 'ilyos_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
+const VERIFICATION_LIFETIME = 10 * 60 * 1000;
+const VERIFICATION_RESEND_DELAY = 60 * 1000;
+const MAX_VERIFICATION_ATTEMPTS = 5;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getStoreForSite(name) {
@@ -18,6 +21,10 @@ function getStoreForSite(name) {
 
 function getAccounts() {
   return getStoreForSite('ilyos-accounts');
+}
+
+function getEmailVerifications() {
+  return getStoreForSite('ilyos-email-verifications');
 }
 
 function getAccount(email) {
@@ -132,7 +139,55 @@ function parseBody(event) {
   return JSON.parse(rawBody);
 }
 
-async function createAccount({ name, email, password }) {
+function verificationKey(email) {
+  return `pending/${createHash('sha256').update(email).digest('hex')}`;
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
+async function sendVerificationEmail(email, name, code) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) return { error: 'email_service_not_configured' };
+
+  let response;
+  try {
+    response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from,
+        to: [email],
+        subject: 'Ilyos hisobingiz uchun tasdiqlash kodi',
+        text: `Salom, ${name}!\n\nIlyos hisobingizni tasdiqlash kodi: ${code}\nKod 10 daqiqa davomida amal qiladi.`,
+        html: `<p>Salom, ${escapeHtml(name)}!</p><p>Ilyos hisobingizni tasdiqlash kodi:</p><p style="font-size:28px;font-weight:bold;letter-spacing:8px">${code}</p><p>Kod 10 daqiqa davomida amal qiladi.</p>`
+      }),
+      signal: AbortSignal.timeout(10_000)
+    });
+  } catch {
+    console.error('Verification email delivery failed.');
+    return { error: 'email_delivery_failed' };
+  }
+
+  if (!response.ok) {
+    console.error('Verification email provider rejected the request:', response.status);
+    return { error: 'email_delivery_failed' };
+  }
+  return {};
+}
+
+async function startAccountRegistration({ name, email, password }) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = typeof name === 'string' ? name.trim() : '';
   if (!normalizedEmail || !normalizedName || normalizedName.length > 100 ||
@@ -140,9 +195,82 @@ async function createAccount({ name, email, password }) {
     return { error: 'invalid_account' };
   }
 
+  const accounts = getAccounts();
+  if (await accounts.get(accountKey(normalizedEmail), { type: 'json' })) {
+    return { error: 'email_exists' };
+  }
+
+  const verifications = getEmailVerifications();
+  const key = verificationKey(normalizedEmail);
+  const existing = await verifications.get(key, { type: 'json' });
+  const now = Date.now();
+  if (existing && existing.expiresAt > now && now - existing.createdAt < VERIFICATION_RESEND_DELAY) {
+    return { error: 'verification_rate_limited' };
+  }
+
   const { salt, hash } = await hashPassword(password);
-  const user = { email: normalizedEmail, name: normalizedName, passwordSalt: salt, passwordHash: hash };
+  const code = String(randomInt(100_000, 1_000_000));
+  const pending = {
+    id: randomBytes(16).toString('hex'),
+    email: normalizedEmail,
+    name: normalizedName,
+    passwordSalt: salt,
+    passwordHash: hash,
+    codeHash: createHmac('sha256', await getSessionSecret())
+      .update(`${normalizedEmail}:${code}`)
+      .digest('hex'),
+    attempts: 0,
+    createdAt: now,
+    expiresAt: now + VERIFICATION_LIFETIME
+  };
+
+  await verifications.setJSON(key, pending);
+  const delivery = await sendVerificationEmail(normalizedEmail, normalizedName, code);
+  if (delivery.error) {
+    const current = await verifications.get(key, { type: 'json' });
+    if (current?.id === pending.id) await verifications.delete(key);
+    return delivery;
+  }
+  return { pending: true };
+}
+
+async function verifyAccountRegistration({ email, code }) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || typeof code !== 'string' || !/^\d{6}$/.test(code)) {
+    return { error: 'invalid_verification_code' };
+  }
+
+  const verifications = getEmailVerifications();
+  const key = verificationKey(normalizedEmail);
+  const pending = await verifications.get(key, { type: 'json' });
+  if (!pending) return { error: 'verification_expired' };
+  if (pending.expiresAt <= Date.now()) {
+    await verifications.delete(key);
+    return { error: 'verification_expired' };
+  }
+
+  const codeHash = createHmac('sha256', await getSessionSecret())
+    .update(`${normalizedEmail}:${code}`)
+    .digest();
+  const expectedHash = Buffer.from(pending.codeHash, 'hex');
+  if (expectedHash.length !== codeHash.length || !timingSafeEqual(expectedHash, codeHash)) {
+    pending.attempts += 1;
+    if (pending.attempts >= MAX_VERIFICATION_ATTEMPTS) {
+      await verifications.delete(key);
+      return { error: 'verification_attempts_exceeded' };
+    }
+    await verifications.setJSON(key, pending);
+    return { error: 'invalid_verification_code' };
+  }
+
+  const user = {
+    email: pending.email,
+    name: pending.name,
+    passwordSalt: pending.passwordSalt,
+    passwordHash: pending.passwordHash
+  };
   const result = await getAccounts().setJSON(accountKey(normalizedEmail), user, { onlyIfNew: true });
+  await verifications.delete(key);
   return result.modified ? { user: toPublicUser(user) } : { error: 'email_exists' };
 }
 
@@ -247,7 +375,6 @@ module.exports = {
   accountKey,
   authenticateWithGoogle,
   chatKey,
-  createAccount,
   getAccount,
   getAccounts,
   getChats,
@@ -258,6 +385,8 @@ module.exports = {
   readSession,
   sessionCookie,
   signSession,
+  startAccountRegistration,
   toPublicUser,
-  validateChats
+  validateChats,
+  verifyAccountRegistration
 };

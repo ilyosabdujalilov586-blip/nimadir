@@ -1,921 +1,659 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="auth.pageTitle">Ilyos | Kirish va Ro'yxatdan o'tish</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="./cursor.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --black: #080B14;
-            --panel: #101524;
-            --panel-soft: #171E32;
-            --line: rgba(139, 92, 246, 0.25);
-            --text: #f3f4f6;
-            --muted: #94a3b8;
-            --purple: #C084FC;
-            --purple-strong: #8B5CF6;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <title>Ilyos | Hisobga kirish</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer onload="initializeGoogleSignIn()"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b14;
+      --surface: rgba(17, 23, 40, .86);
+      --text: #f6f7fb;
+      --muted: #9ba6bd;
+      --line: rgba(163, 177, 212, .15);
+      --purple: #9b75ff;
+      --blue: #658bff;
+      --pink: #df75dc;
+      font-family: "DM Sans", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
 
-        * { box-sizing: border-box; }
-        html, body {
-            min-height: 100%;
-            width: 100%;
-        }
-        body {
-            margin: 0;
-            background: #080B14;
-            color: var(--text);
-            font-family: 'Manrope', sans-serif;
-            overflow-x: hidden;
-        }
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100dvh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 12% 12%, rgba(68, 104, 255, .17), transparent 38%),
+        radial-gradient(ellipse at 86% 88%, rgba(170, 74, 218, .16), transparent 40%),
+        var(--bg);
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .auth-layout {
+      width: min(1120px, 100%);
+      min-height: min(760px, 100dvh);
+      display: grid;
+      grid-template-columns: 1fr 470px;
+      align-items: center;
+      gap: clamp(36px, 8vw, 100px);
+      padding: 56px clamp(24px, 6vw, 76px);
+    }
+    .story { max-width: 480px; }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+      text-decoration: none;
+      font: 700 21px "Space Grotesk", sans-serif;
+      letter-spacing: -.04em;
+    }
+    .brand img {
+      width: 42px;
+      height: 42px;
+      filter: drop-shadow(0 6px 20px rgba(134, 94, 255, .45));
+    }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 76px 0 20px;
+      color: #c4b3ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      width: 24px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--blue), var(--pink));
+      content: "";
+    }
+    .story h1 {
+      max-width: 500px;
+      margin: 0;
+      font: 600 clamp(42px, 5.3vw, 68px)/1.05 "Space Grotesk", sans-serif;
+      letter-spacing: -.065em;
+    }
+    .story h1 span {
+      color: transparent;
+      background: linear-gradient(100deg, #91aaff 4%, #c49aff 56%, #f29bd9 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+    .story-copy {
+      max-width: 390px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-top: 44px;
+      color: #d5d9e6;
+      font-size: 13px;
+    }
+    .feature-icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(161, 134, 255, .28);
+      border-radius: 12px;
+      background: rgba(132, 103, 245, .12);
+      color: #c7b3ff;
+    }
+    .feature svg { width: 18px; height: 18px; }
+    .feature strong { display: block; margin-bottom: 3px; font-size: 13px; }
+    .feature span { color: var(--muted); }
 
-        main, section, .parent { min-height: 100vh; }
-
-        .parent {
-            display: grid;
-            place-items: center;
-            padding: 28px 18px;
-            background:
-                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, .2), transparent 45%),
-                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, .15), transparent 45%),
-                #080B14;
-        }
-
-        .sing-up {
-            position: relative;
-            width: min(100%, 430px);
-            padding: 38px 32px 34px;
-            overflow: hidden;
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            background: linear-gradient(145deg, rgba(23, 30, 50, .98), rgba(10, 13, 24, .98));
-            box-shadow: 0 24px 70px rgba(0, 0, 0, .65);
-        }
-
-        .auth-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 22px;
-        }
-
-        .auth-brand img {
-            width: 32px;
-            height: 32px;
-        }
-
-        .auth-brand span {
-            color: var(--text);
-            font-size: 1.1rem;
-            font-weight: 800;
-            letter-spacing: -.03em;
-        }
-
-        .auth-controls {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 24px;
-        }
-
-        .auth-tabs {
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 16px;
-            border: 1px solid var(--line);
-        }
-
-        .auth-tab {
-            flex: 1;
-            min-width: 0;
-            background: transparent;
-            border: none;
-            color: var(--muted);
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 700;
-            padding: 12px 6px;
-            cursor: pointer;
-            border-radius: 9px;
-            line-height: 1.2;
-            transition: all 0.2s ease;
-        }
-
-        .auth-tab.active {
-            background: var(--purple-strong);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-
-        .sing-up-title {
-            margin: 0 0 20px;
-            color: var(--text);
-            font-size: clamp(1.5rem, 5vw, 1.9rem);
-            font-weight: 800;
-            line-height: 1.1;
-            text-align: center;
-            letter-spacing: -.04em;
-            background: linear-gradient(135deg, #FFFFFF 0%, #C084FC 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .sing-up form {
-            display: none;
-            gap: 9px;
-        }
-
-        .sing-up form.active-form {
-            display: grid;
-        }
-
-        .email-title, .password-title, .name-title {
-            margin-top: 8px;
-            color: var(--muted);
-            font-size: .78rem;
-            font-weight: 700;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-        }
-
-        .email-input, .password-input, .name-input {
-            width: 100%;
-            border: 1px solid var(--line);
-            border-radius: 13px;
-            outline: none;
-            padding: 14px 15px;
-            background: rgba(255, 255, 255, .035);
-            color: var(--text);
-            font: inherit;
-            font-size: .95rem;
-            transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
-        }
-
-        .email-input:focus, .password-input:focus, .name-input:focus {
-            border-color: var(--purple-strong);
-            background: rgba(139, 92, 246, .1);
-            transform: translateY(-2px);
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, .2);
-        }
-
-        .sing-up-link {
-            display: block;
-            width: 100%;
-            margin-top: 17px;
-            border: 1px solid var(--purple-strong);
-            border-radius: 13px;
-            padding: 13px 18px;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #D946EF 100%);
-            color: #FFFFFF;
-            font-size: .95rem;
-            font-weight: 800;
-            text-align: center;
-            cursor: pointer;
-            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
-            box-shadow: 0 4px 18px rgba(139, 92, 246, .35);
-        }
-
-        .sing-up-link:hover {
-            filter: brightness(1.1);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 24px rgba(139, 92, 246, .45);
-        }
-
-        .code-alert {
-            width: min(100% - 32px, 390px);
-            padding: 32px;
-            border: 1px solid rgba(192, 132, 252, .35);
-            border-radius: 24px;
-            background: linear-gradient(145deg, #171e32, #0a0d18);
-            color: var(--text);
-            text-align: center;
-            box-shadow: 0 28px 90px rgba(0, 0, 0, .65), 0 0 50px rgba(139, 92, 246, .2);
-        }
-
-        .code-alert::backdrop {
-            background: rgba(3, 5, 12, .78);
-            backdrop-filter: blur(8px);
-        }
-
-        .code-alert-icon {
-            display: grid;
-            width: 58px;
-            height: 58px;
-            margin: 0 auto 18px;
-            place-items: center;
-            border: 1px solid rgba(192, 132, 252, .35);
-            border-radius: 18px;
-            background: rgba(139, 92, 246, .15);
-            color: #d8b4fe;
-            font-size: 1.6rem;
-        }
-
-        .code-alert h2 {
-            margin: 0;
-            font-size: 1.35rem;
-            font-weight: 800;
-        }
-
-        .code-alert-message {
-            margin: 10px 0 22px;
-            color: var(--muted);
-            font-size: .9rem;
-            line-height: 1.6;
-        }
-
-        .code-alert-value {
-            margin-bottom: 22px;
-            border: 1px solid rgba(192, 132, 252, .25);
-            border-radius: 16px;
-            padding: 15px;
-            background: rgba(139, 92, 246, .09);
-            color: #e9d5ff;
-            font-size: clamp(2rem, 10vw, 2.6rem);
-            font-weight: 800;
-            letter-spacing: .32em;
-            line-height: 1;
-            text-indent: .32em;
-            user-select: all;
-        }
-
-        .code-alert-dismiss {
-            width: 100%;
-            border: 0;
-            border-radius: 13px;
-            padding: 13px 18px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6 55%, #d946ef);
-            color: #fff;
-            font: inherit;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 4px 18px rgba(139, 92, 246, .3);
-            transition: filter .2s ease, transform .2s ease;
-        }
-
-        .code-alert-dismiss:hover {
-            filter: brightness(1.1);
-            transform: translateY(-2px);
-        }
-
-        .google-divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 18px 0 12px;
-            color: var(--muted);
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-        .google-divider::before, .google-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--line);
-        }
-        .google-divider::before { margin-right: 10px; }
-        .google-divider::after { margin-left: 10px; }
-
-        .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            border: 1px solid var(--line);
-            border-radius: 13px;
-            padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text);
-            font-family: inherit;
-            font-size: .95rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .google-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--purple-strong);
-            transform: translateY(-2px);
-        }
-        .google-btn svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-        }
-
-        .login-error {
-            min-height: 20px;
-            margin: 14px 0 0;
-            color: #ff8f82;
-            font-size: .82rem;
-            font-weight: 700;
-            text-align: center;
-            word-break: break-word;
-        }
-        .login-error.success { color: #4ade80; }
-        .login-error.is-visible { animation: errorShake .3s ease; }
-
-        body.connection-pending {
-            overflow: hidden;
-        }
-
-        .auth-language {
-            width: max-content;
-            height: 44px;
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            padding: 8px 28px 8px 13px;
-            background: rgba(16, 21, 36, .96);
-            color: var(--text);
-            font: inherit;
-            font-size: .84rem;
-            cursor: pointer;
-            align-self: flex-start;
-        }
-
-        .auth-language option {
-            background: #101524;
-            color: #fff;
-        }
-
-        .connection-screen {
-            position: fixed;
-            z-index: 10000;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            background:
-                radial-gradient(circle at 50% 45%, rgba(139, 92, 246, .18), transparent 38%),
-                #080B14;
-            opacity: 1;
-            visibility: visible;
-            transition: opacity .45s ease, visibility .45s ease;
-        }
-
-        .connection-screen.is-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .connection-screen::before {
-            position: absolute;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            content: "ILYOS.AI";
-            color: rgba(192, 132, 252, .08);
-            font-size: clamp(4rem, 16vw, 14rem);
-            font-weight: 800;
-            letter-spacing: .08em;
-            white-space: nowrap;
-            animation: backgroundBrand 8s ease-in-out infinite alternate;
-            pointer-events: none;
-        }
-
-        .connection-content {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            justify-items: center;
-            gap: 20px;
-            padding: 24px;
-            text-align: center;
-        }
-
-        .connection-spinner {
-            position: relative;
-            display: grid;
-            place-items: center;
-            width: 76px;
-            height: 76px;
-        }
-
-        .connection-spinner::before {
-            position: absolute;
-            inset: 0;
-            border: 4px solid rgba(192, 132, 252, .2);
-            border-top-color: var(--purple);
-            border-radius: 50%;
-            animation: connectionSpin .9s linear infinite;
-            content: "";
-        }
-
-        .connection-logo {
-            position: relative;
-            margin: 0;
-            color: #fff;
-            font-size: .75rem;
-            font-weight: 800;
-            letter-spacing: .02em;
-            white-space: nowrap;
-        }
-
-        .connection-screen.connection-failed .connection-spinner::before {
-            animation-play-state: paused;
-            opacity: .45;
-        }
-
-        .connection-spinner[hidden] {
-            display: none;
-        }
-
-        .connection-message {
-            max-width: 320px;
-            margin: 12px 0 0;
-            color: #ffb4a9;
-            font-size: .95rem;
-            font-weight: 700;
-        }
-
-        .connection-retry {
-            border: 1px solid var(--purple-strong);
-            border-radius: 10px;
-            padding: 10px 18px;
-            background: rgba(139, 92, 246, .18);
-            color: #fff;
-            font: inherit;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .connection-retry:hover {
-            background: rgba(139, 92, 246, .32);
-        }
-
-        @keyframes connectionSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes backgroundBrand {
-            from { transform: translateX(-3%) scale(.96); opacity: .55; }
-            to { transform: translateX(3%) scale(1.04); opacity: 1; }
-        }
-
-        @keyframes errorShake {
-            0%, 100% { transform: translateX(0); }
-            30% { transform: translateX(-6px); }
-            70% { transform: translateX(6px); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .connection-screen::before,
-            .connection-spinner::before {
-                animation-duration: 3s;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .auth-language {
-                width: max-content;
-                height: 40px;
-                padding: 6px 20px 6px 9px;
-                font-size: .72rem;
-            }
-            .auth-controls {
-                gap: 0px;
-                margin-bottom: 18px;
-            }
-            .auth-tabs {
-                margin-bottom: 12px;
-            }
-            .auth-tab {
-                padding: 10px 5px;
-                font-size: .85rem;
-                overflow-wrap: anywhere;
-            }
-            .parent {
-                padding: 16px 12px;
-            }
-            .sing-up {
-                width: min(100%, 100%);
-                padding: 26px 18px 22px;
-                border-radius: 20px;
-            }
-            .sing-up-title {
-                font-size: 1.5rem;
-                margin-bottom: 16px;
-            }
-            .email-input, .password-input, .name-input {
-                padding: 12px 14px;
-                font-size: 0.9rem;
-            }
-            .sing-up-link, .google-btn {
-                padding: 12px 14px;
-                font-size: 0.9rem;
-            }
-            .google-btn {
-                gap: 8px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .sing-up {
-                padding: 22px 14px 18px;
-            }
-            .auth-controls {
-                gap: 0px;
-            }
-            .auth-language {
-                padding-right: 16px;
-                padding-left: 7px;
-                font-size: .65rem;
-            }
-            .auth-tabs {
-                padding: 3px;
-                margin-bottom: 10px;
-            }
-            .auth-tab {
-                font-size: 0.75rem;
-                padding: 8px 6px;
-            }
-            .sing-up-title {
-                font-size: 1.35rem;
-            }
-            .email-title, .password-title, .name-title {
-                font-size: 0.72rem;
-            }
-        }
-    </style>
+    .auth-card {
+      width: 100%;
+      padding: 36px;
+      border: 1px solid rgba(167, 177, 210, .17);
+      border-radius: 25px;
+      background: linear-gradient(155deg, rgba(24, 31, 52, .94), rgba(13, 17, 30, .96));
+      box-shadow: 0 30px 100px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .04);
+      backdrop-filter: blur(20px);
+    }
+    .card-heading { margin-bottom: 26px; }
+    .card-heading h2 {
+      margin: 0;
+      font: 600 27px "Space Grotesk", sans-serif;
+      letter-spacing: -.04em;
+    }
+    .card-heading p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 23px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(5, 8, 16, .42);
+    }
+    .tab {
+      min-height: 40px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .tab[aria-selected="true"] {
+      background: rgba(139, 107, 255, .2);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(174, 149, 255, .2);
+    }
+    .form-fields { display: grid; gap: 15px; }
+    .field { display: grid; gap: 7px; }
+    .field label { color: #d6daea; font-size: 12px; font-weight: 600; }
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      width: 17px;
+      height: 17px;
+      color: #818ca6;
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+    .input-icon svg { display: block; width: 100%; height: 100%; }
+    .field input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px 0 43px;
+      outline: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(6, 9, 17, .54);
+      color: var(--text);
+      font-size: 13px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .field input::placeholder { color: #67728a; }
+    .field input:focus {
+      border-color: rgba(164, 132, 255, .75);
+      background: rgba(11, 14, 26, .9);
+      box-shadow: 0 0 0 3px rgba(143, 109, 255, .14);
+    }
+    .field input.code-input {
+      padding-left: 14px;
+      text-align: center;
+      font: 600 22px "Space Grotesk", sans-serif;
+      letter-spacing: .45em;
+    }
+    .primary-button {
+      width: 100%;
+      min-height: 49px;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(100deg, #527aff, #875cf4 58%, #bf63df);
+      box-shadow: 0 9px 25px rgba(109, 91, 238, .25);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+    }
+    .primary-button:hover:not(:disabled) {
+      filter: brightness(1.08);
+      box-shadow: 0 12px 30px rgba(109, 91, 238, .36);
+      transform: translateY(-1px);
+    }
+    .primary-button:disabled { cursor: wait; opacity: .65; }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin: 22px 0 18px;
+      color: #77829a;
+      font-size: 11px;
+    }
+    .divider::before, .divider::after {
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+      content: "";
+    }
+    #googleButton { display: flex; justify-content: center; min-height: 42px; }
+    .google-fallback {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid rgba(190, 199, 220, .25);
+      border-radius: 10px;
+      background: #f8f9fc;
+      color: #292d35;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .google-fallback[hidden] { display: none; }
+    .google-fallback svg { width: 18px; height: 18px; }
+    .status {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: #ffaaaa;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .status.success { color: #8ce4bb; }
+    .verify-note { margin: -8px 0 6px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .resend-button {
+      display: block;
+      margin: 14px auto 0;
+      padding: 6px 8px;
+      border: 0;
+      background: transparent;
+      color: #c4b3ff;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .resend-button:hover { color: white; text-decoration: underline; }
+    .back-link {
+      margin: 12px auto 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .back-link:hover { color: white; }
+    .legal {
+      margin: 20px 0 0;
+      color: #737e95;
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    [hidden] { display: none !important; }
+    button:focus-visible {
+      outline: 2px solid #c8b6ff;
+      outline-offset: 3px;
+    }
+    @media (max-width: 900px) {
+      .auth-layout {
+        width: min(560px, 100%);
+        min-height: 100dvh;
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: max(20px, env(safe-area-inset-top)) 22px max(20px, env(safe-area-inset-bottom));
+      }
+      .story { display: none; }
+      .auth-card { padding: clamp(24px, 7vw, 36px); }
+    }
+    @media (max-width: 390px) {
+      .auth-layout { padding: 16px; }
+      .auth-card { padding: 23px 19px; border-radius: 20px; }
+    }
+    @media (max-height: 700px) {
+      body { place-items: start center; }
+      .auth-layout { align-content: start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
+  <main class="auth-layout">
+    <section class="story" aria-label="Ilyos AI">
+      <a class="brand" href="./home.html">
+        <img src="favicon.svg" alt="">
+        <span>ILYOS AI</span>
+      </a>
+      <p class="eyebrow">Siz uchun yangi imkoniyatlar</p>
+      <h1>G‘oyangizga <span>aqlli hamroh.</span></h1>
+      <p class="story-copy">Ilyos AI bilan savollaringizga javob toping, yangi g‘oyalar yarating va ishingizni osonlashtiring.</p>
+      <div class="feature">
+        <span class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </span>
+        <div><strong>Bir joyda — barcha g‘oyalar</strong><span>Hisobingiz bilan suhbatlaringizni saqlang.</span></div>
+      </div>
+    </section>
 
-    <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
-
-    <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
-        <div class="connection-content">
-            <div class="connection-spinner" id="connectionSpinner" aria-hidden="true">
-                <span class="connection-logo">ILYOS.AI</span>
-            </div>
-            <p class="connection-message" id="connectionMessage" data-i18n="auth.offline" hidden>Internet ishlamadi. Ulanishni tekshirib, qayta urinib ko'ring.</p>
-            <button class="connection-retry" id="connectionRetry" type="button" data-i18n="auth.retry" hidden>Qayta tekshirish</button>
+    <section class="auth-card" aria-labelledby="formTitle">
+      <div id="authForms">
+        <div class="card-heading">
+          <h2 id="formTitle">Hisobingizga kiring</h2>
+          <p id="formSubtitle">Ilyos AI’dan foydalanishni davom ettiring.</p>
         </div>
-    </div>
 
-    <main inert aria-hidden="true">
-        <section>
-            <div class="parent">
-                <div class="sing-up">
-                    <div class="auth-brand" aria-label="Ilyos AI">
-                        <img src="favicon.svg" alt="">
-                        <span>ILYOS AI</span>
-                    </div>
+        <div class="tabs" role="tablist" aria-label="Hisob amallari">
+          <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Kirish</button>
+          <button class="tab" id="registerTab" type="button" role="tab" aria-selected="false">Ro‘yxatdan o‘tish</button>
+        </div>
 
-                    <div class="auth-controls">
-                        <div class="auth-tabs" id="authTabsContainer">
-                            <button class="auth-tab active" id="tabLogin" data-i18n="auth.loginTab">Kirish</button>
-                            <button class="auth-tab" id="tabRegister" data-i18n="auth.registerTab">Ro'yxatdan o'tish</button>
-                        </div>
-                        <select class="auth-language" id="languageSelect" aria-label="Til">
-                            <option value="uz">O‘zbekcha</option>
-                            <option value="en">English</option>
-                            <option value="ru">Русский</option>
-                        </select>
-                    </div>
-
-                    <h1 class="sing-up-title" id="formTitle" data-i18n="auth.loginTitle">Tizimga kirish</h1>
-
-                    <!-- Kirish Formasi -->
-                    <form id="loginForm" class="active-form">
-                        <label class="email-title" for="emailInput" data-i18n="auth.email">Email</label>
-                        <input id="emailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
-                    
-                        <label class="password-title" for="passwordInput" data-i18n="auth.password">Parol</label>
-                        <input id="passwordInput" class="password-input" type="password" placeholder="Parol kiriting" data-i18n-placeholder="auth.passwordPlaceholder" required>
-                    
-                        <button class="sing-up-link" type="submit" data-i18n="auth.login">Kirish</button>
-
-                        <div class="google-divider" data-i18n="auth.or">yoki</div>
-                        <button type="button" class="google-btn" id="googleLoginBtn">
-                            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                            <span data-i18n="auth.googleLogin">Google orqali kirish</span>
-                        </button>
-                    </form>
-
-                    <!-- Ro'yxatdan o'tish Formasi -->
-                    <form id="registerForm">
-                        <label class="name-title" for="nameInput" data-i18n="auth.name">Ism</label>
-                        <input id="nameInput" class="name-input" type="text" placeholder="Ismingizni kiriting" data-i18n-placeholder="auth.namePlaceholder" required>
-
-                        <label class="email-title" for="regEmailInput" data-i18n="auth.email">Email</label>
-                        <input id="regEmailInput" class="email-input" type="email" placeholder="Email kiriting" data-i18n-placeholder="auth.emailPlaceholder" required>
-
-                        <label class="password-title" for="regPasswordInput" data-i18n="auth.password">Parol</label>
-                        <input id="regPasswordInput" class="password-input" type="password" minlength="8" placeholder="Yangi parol yarating" data-i18n-placeholder="auth.newPasswordPlaceholder" required>
-                    
-                        <button class="sing-up-link" type="submit" data-i18n="auth.register">Ro'yxatdan o'tish</button>
-
-                        <div class="google-divider" data-i18n="auth.or">yoki</div>
-                        <button type="button" class="google-btn" id="googleRegisterBtn">
-                            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                            <span data-i18n="auth.googleRegister">Google orqali ro'yxatdan o'tish</span>
-                        </button>
-                    </form>
-
-                    <!-- Kodni tasdiqlash Formasi -->
-                    <form id="verifyForm">
-                        <label class="name-title" for="verifyCodeInput" data-i18n="auth.verifyCode">Tasdiqlash kodi</label>
-                        <p style="font-size: 0.8rem; color: var(--muted); margin: 0 0 8px;" data-i18n="auth.codeInstructions">Alertda ko‘rsatilgan 4 xonali kodni kiriting:</p>
-                        <input id="verifyCodeInput" class="name-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kodni kiriting" data-i18n-placeholder="auth.codePlaceholder" maxlength="4" required>
-                        <button class="sing-up-link" type="submit" data-i18n="auth.confirmCode">Kodni tasdiqlash</button>
-                    </form>
-
-                    <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
-
-                </div>
+        <form id="loginForm" class="form-fields" autocomplete="on">
+          <div class="field">
+            <label for="loginEmail">Email manzilingiz</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input id="loginEmail" name="email" type="email" placeholder="siz@example.com" autocomplete="email" maxlength="254" required>
             </div>
-        </section>
-    </main>
-
-    <dialog class="code-alert" id="codeAlert" aria-labelledby="codeAlertTitle" aria-describedby="codeAlertMessage">
-        <div class="code-alert-icon" aria-hidden="true">✦</div>
-        <h2 id="codeAlertTitle" data-i18n="auth.codeAlertTitle">Tasdiqlash kodi</h2>
-        <p class="code-alert-message" id="codeAlertMessage" data-i18n="auth.codeAlertMessage">Ro‘yxatdan o‘tishni yakunlash uchun quyidagi kodni kiriting:</p>
-        <div class="code-alert-value" id="codeAlertValue" aria-live="polite"></div>
-        <form method="dialog">
-            <button class="code-alert-dismiss" type="submit" data-i18n="auth.codeAlertDismiss">Tushunarli</button>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Parol</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10" width="15" height="11" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1" fill="currentColor"/></svg></span>
+              <input id="loginPassword" name="password" type="password" placeholder="Parolingizni kiriting" autocomplete="current-password" required>
+            </div>
+          </div>
+          <button class="primary-button" id="loginSubmit" type="submit">Kirish</button>
         </form>
-    </dialog>
 
-    <script src="./cursor.js"></script>
-    <script src="./language.js"></script>
-    <script>
-        (() => {
-            const screen = document.getElementById('connectionScreen');
-            const message = document.getElementById('connectionMessage');
-            const retryButton = document.getElementById('connectionRetry');
-            const spinner = document.getElementById('connectionSpinner');
-            const main = document.querySelector('main');
-            let timeoutId;
-            let isChecking = false;
-            let isUnlocked = false;
+        <form id="registerForm" class="form-fields" autocomplete="on" hidden>
+          <div class="field">
+            <label for="registerName">Ismingiz</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20c.7-3.4 3.2-5.2 7.5-5.2s6.8 1.8 7.5 5.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <input id="registerName" name="name" type="text" placeholder="Ismingizni kiriting" autocomplete="name" maxlength="100" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registerEmail">Email manzilingiz</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <input id="registerEmail" name="email" type="email" placeholder="siz@example.com" autocomplete="email" maxlength="254" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registerPassword">Parol</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10" width="15" height="11" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1" fill="currentColor"/></svg></span>
+              <input id="registerPassword" name="password" type="password" placeholder="Kamida 8 ta belgi" autocomplete="new-password" minlength="8" required>
+            </div>
+          </div>
+          <button class="primary-button" id="registerSubmit" type="submit">Ro‘yxatdan o‘tish</button>
+        </form>
 
-            document.body.classList.add('connection-pending');
+        <section id="verifyPanel" hidden aria-labelledby="verifyTitle">
+          <div class="card-heading">
+            <h2 id="verifyTitle">Emailni tasdiqlang</h2>
+            <p class="verify-note">Tasdiqlash kodini emailingizga yubordik: <strong id="verifyEmail"></strong></p>
+          </div>
+          <form id="verifyForm" class="form-fields">
+            <div class="field">
+              <label for="verifyCode">6 xonali tasdiqlash kodi</label>
+              <input class="code-input" id="verifyCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+            </div>
+            <button class="primary-button" id="verifySubmit" type="submit">Kodni tasdiqlash</button>
+          </form>
+          <button class="resend-button" id="resendCode" type="button">Kodni qayta yuborish</button>
+          <button class="back-link" id="backToRegister" type="button">← Ro‘yxatdan o‘tishga qaytish</button>
+        </section>
 
-            function showOfflineMessage() {
-                screen.classList.add('connection-failed');
-                spinner.hidden = true;
-                message.hidden = false;
-                retryButton.hidden = false;
-            }
+        <div id="socialLogin">
+          <div class="divider"><span>yoki</span></div>
+          <div id="googleButton" aria-label="Google orqali kirish"></div>
+          <div class="google-fallback" id="googleFallback" hidden>
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.8 1.2-4.1 2-6.8 2-5.2 0-9.7-3.5-11.3-8.2H5.8v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.7 27.9a12 12 0 0 1 0-7.7v-5.3H5.8a20 20 0 0 0 0 18.3l6.9-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.9 5.3C14.3 15.5 18.8 12 24 12Z"/></svg>
+            Google orqali kirish
+          </div>
+        </div>
+        <p class="status" id="authStatus" role="status" aria-live="polite"></p>
+        <p class="legal">Davom etish orqali hisobingizdan foydalanish shartlariga rozilik bildirasiz.</p>
+      </div>
+    </section>
+  </main>
 
-            async function checkConnection() {
-                if (isChecking || isUnlocked || !navigator.onLine) return;
-                isChecking = true;
-                const controller = new AbortController();
-                const requestTimeout = setTimeout(() => controller.abort(), 4000);
+  <script>
+    const accountApi = './api/account';
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const verifyPanel = document.getElementById('verifyPanel');
+    const socialLogin = document.getElementById('socialLogin');
+    const authStatus = document.getElementById('authStatus');
+    let pendingRegistration = null;
+    let busy = false;
 
-                try {
-                    await fetch('https://www.gstatic.com/generate_204', {
-                        mode: 'no-cors',
-                        cache: 'no-store',
-                        signal: controller.signal
-                    });
+    const apiErrors = {
+      account_not_found: 'Bu email bilan hisob topilmadi.',
+      email_exists: 'Bu email allaqachon ro‘yxatdan o‘tgan. Kirishni sinab ko‘ring.',
+      email_service_not_configured: 'Email yuborish xizmati sozlanmagan. Administrator bilan bog‘laning.',
+      email_delivery_failed: 'Tasdiqlash kodi yuborilmadi. Birozdan so‘ng qayta urinib ko‘ring.',
+      google_not_configured: 'Google orqali kirish hozircha sozlanmagan.',
+      invalid_account: 'Ism, email yoki parol noto‘g‘ri. Parol kamida 8 ta belgidan iborat bo‘lsin.',
+      invalid_credentials: 'Email yoki parol noto‘g‘ri.',
+      invalid_google_credential: 'Google orqali tasdiqlash amalga oshmadi. Qayta urinib ko‘ring.',
+      invalid_verification_code: 'Kod noto‘g‘ri. Emailga yuborilgan 6 xonali kodni tekshiring.',
+      verification_expired: 'Tasdiqlash kodi eskirgan. Yangi kod so‘rang.',
+      verification_attempts_exceeded: 'Urinishlar limiti tugadi. Ro‘yxatdan o‘tishni qaytadan boshlang.',
+      verification_rate_limited: 'Yangi kod yuborishdan oldin bir daqiqa kuting.'
+    };
 
-                    isUnlocked = true;
-                    clearTimeout(timeoutId);
-                    main.removeAttribute('inert');
-                    main.removeAttribute('aria-hidden');
-                    document.body.classList.remove('connection-pending');
-                    screen.classList.add('is-hidden');
-                    setTimeout(() => screen.remove(), 500);
-                } catch {
-                    // Keep the page blocked and show the failure message at the 4-second mark.
-                } finally {
-                    clearTimeout(requestTimeout);
-                    isChecking = false;
-                }
-            }
+    function showStatus(message, success = false) {
+      authStatus.textContent = message;
+      authStatus.classList.toggle('success', success);
+    }
 
-            function beginCheck() {
-                clearTimeout(timeoutId);
-                screen.classList.remove('connection-failed');
-                message.hidden = true;
-                retryButton.hidden = true;
-                spinner.hidden = false;
-                timeoutId = setTimeout(showOfflineMessage, 4000);
-                checkConnection();
-            }
+    function setBusy(value, button) {
+      busy = value;
+      document.querySelectorAll('.primary-button, .tab, .resend-button, .back-link').forEach(control => {
+        control.disabled = value;
+      });
+      if (button) button.textContent = value ? 'Kutilmoqda…' : button.dataset.label;
+    }
 
-            retryButton.addEventListener('click', beginCheck);
-            window.addEventListener('online', checkConnection);
-            beginCheck();
-        })();
-    </script>
-    <script>
-        const tabLogin = document.getElementById('tabLogin');
-        const tabRegister = document.getElementById('tabRegister');
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        const verifyForm = document.getElementById('verifyForm');
-        const formTitle = document.getElementById('formTitle');
-        const loginError = document.getElementById('loginError');
-        const authTabsContainer = document.getElementById('authTabsContainer');
-        const codeAlert = document.getElementById('codeAlert');
-        const codeAlertValue = document.getElementById('codeAlertValue');
-
-        let pendingUserData = null;
-        let generatedCode = null;
-        let activeAuthMessage = null;
-
-        function updateAuthTitle() {
-            const titleKey = verifyForm.classList.contains('active-form')
-                ? 'auth.verifyTitle'
-                : registerForm.classList.contains('active-form')
-                    ? 'auth.registerTitle'
-                    : 'auth.loginTitle';
-            formTitle.textContent = ilyosT(titleKey);
-        }
-
-        function setAuthMessage(key, success = false, values = {}) {
-            activeAuthMessage = { key, success, values };
-            loginError.textContent = ilyosT(key).replace('{code}', values.code || '');
-            loginError.className = `login-error${success ? ' success' : ''} is-visible`;
-        }
-
-        function clearAuthMessage() {
-            activeAuthMessage = null;
-            loginError.textContent = '';
-            loginError.className = 'login-error';
-        }
-
-        window.addEventListener('ilyoslanguagechange', () => {
-            updateAuthTitle();
-            if (activeAuthMessage) {
-                setAuthMessage(activeAuthMessage.key, activeAuthMessage.success, activeAuthMessage.values);
-            }
+    async function requestAccount(action, data = {}) {
+      let response;
+      try {
+        response = await fetch(accountApi, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, ...data })
         });
+      } catch (error) {
+        console.error('Account request failed:', error);
+        throw new Error('Internet bilan aloqa yo‘q. Ulanishni tekshirib, qayta urinib ko‘ring.');
+      }
 
-        tabLogin.addEventListener('click', () => {
-            tabLogin.classList.add('active');
-            tabRegister.classList.remove('active');
-            loginForm.classList.add('active-form');
-            registerForm.classList.remove('active-form');
-            verifyForm.classList.remove('active-form');
-            updateAuthTitle();
-            clearAuthMessage();
-        });
+      let result;
+      try {
+        result = await response.json();
+      } catch (error) {
+        console.error('Account server returned invalid JSON:', error);
+        throw new Error('Serverdan javob olishda xatolik yuz berdi.');
+      }
+      if (!response.ok) throw new Error(apiErrors[result.error] || 'Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.');
+      return result;
+    }
 
-        tabRegister.addEventListener('click', () => {
-            tabRegister.classList.add('active');
-            tabLogin.classList.remove('active');
-            registerForm.classList.add('active-form');
-            loginForm.classList.remove('active-form');
-            verifyForm.classList.remove('active-form');
-            updateAuthTitle();
-            clearAuthMessage();
-        });
+    function showTab(mode) {
+      if (busy) return;
+      verifyPanel.hidden = true;
+      loginForm.hidden = mode !== 'login';
+      registerForm.hidden = mode !== 'register';
+      socialLogin.hidden = false;
+      loginTab.setAttribute('aria-selected', String(mode === 'login'));
+      registerTab.setAttribute('aria-selected', String(mode === 'register'));
+      document.getElementById('formTitle').textContent = mode === 'login' ? 'Hisobingizga kiring' : 'Yangi hisob yarating';
+      document.getElementById('formSubtitle').textContent = mode === 'login'
+        ? 'Ilyos AI’dan foydalanishni davom ettiring.'
+        : 'Boshlash uchun ma’lumotlaringizni kiriting.';
+      showStatus('');
+    }
 
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
+    async function completeSignIn(result) {
+      if (!result.user || typeof result.user.email !== 'string' || typeof result.user.name !== 'string') {
+        throw new Error('Server hisob ma’lumotlarini noto‘g‘ri qaytardi.');
+      }
+      try {
+        localStorage.setItem('ilyosActiveUser', JSON.stringify(result.user));
+      } catch (error) {
+        console.error('Signed-in account could not be cached:', error);
+      }
+      showStatus('Muvaffaqiyatli kirdingiz. Yo‘naltirilmoqda…', true);
+      window.location.assign('./home.html');
+    }
 
-        function setSignedInUser(user, messageKey = 'auth.loginSuccess') {
-            localStorage.setItem('ilyosActiveUser', JSON.stringify(user));
-            setAuthMessage(messageKey, true);
-            setTimeout(() => {
-                window.location.href = './home.html';
-            }, 700);
-        }
+    async function submitWithButton(action, data, button, successMessage) {
+      if (busy) return;
+      button.dataset.label ||= button.textContent;
+      setBusy(true, button);
+      showStatus('');
+      try {
+        const result = await requestAccount(action, data);
+        if (successMessage) showStatus(successMessage, true);
+        return result;
+      } catch (error) {
+        showStatus(error.message);
+        return null;
+      } finally {
+        setBusy(false);
+      }
+    }
 
-        function readLegacyUsers() {
-            const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
-            if (!Array.isArray(users)) throw new Error('Saved account data is invalid.');
-            return users;
-        }
+    loginTab.addEventListener('click', () => showTab('login'));
+    registerTab.addEventListener('click', () => showTab('register'));
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = document.getElementById('loginSubmit');
+      const result = await submitWithButton('login', {
+        email: document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value
+      }, button);
+      if (result) await completeSignIn(result);
+    });
 
-        function findLocalUser(email) {
-            const normalizedEmail = email.trim().toLowerCase();
-            return readLegacyUsers().find(user =>
-                typeof user.email === 'string' &&
-                user.email.trim().toLowerCase() === normalizedEmail
-            );
-        }
+    registerForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = document.getElementById('registerSubmit');
+      pendingRegistration = {
+        name: document.getElementById('registerName').value.trim(),
+        email: document.getElementById('registerEmail').value.trim(),
+        password: document.getElementById('registerPassword').value
+      };
+      const result = await submitWithButton('register', pendingRegistration, button);
+      if (!result) {
+        pendingRegistration = null;
+        return;
+      }
+      document.getElementById('verifyEmail').textContent = pendingRegistration.email;
+      document.getElementById('formTitle').textContent = 'Emailni tasdiqlang';
+      document.getElementById('formSubtitle').textContent = 'Kodni emailingizdan toping va quyida kiriting.';
+      loginForm.hidden = true;
+      registerForm.hidden = true;
+      loginTab.parentElement.hidden = true;
+      socialLogin.hidden = true;
+      verifyPanel.hidden = false;
+      document.getElementById('verifyCode').focus();
+      showStatus('Tasdiqlash kodi emailingizga yuborildi.', true);
+    });
 
-        function showLocalStorageError(error) {
-            console.error('Local account storage failed:', error);
-            setAuthMessage('auth.localStorageError');
-        }
+    document.getElementById('verifyForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!pendingRegistration) {
+        showTab('register');
+        return;
+      }
+      const button = document.getElementById('verifySubmit');
+      const result = await submitWithButton('verify', {
+        email: pendingRegistration.email,
+        code: document.getElementById('verifyCode').value.trim()
+      }, button);
+      if (result) {
+        pendingRegistration = null;
+        await completeSignIn(result);
+      } else if (authStatus.textContent.includes('Urinishlar limiti')) {
+        pendingRegistration = null;
+      }
+    });
 
-        function signIn(email, password) {
-            try {
-                const user = findLocalUser(email);
-                if (!user) {
-                    setAuthMessage('auth.noAccount');
-                    return;
-                }
-                if (user.password !== password || user.password === 'GOOGLE_AUTH_USER') {
-                    setAuthMessage('auth.badPassword');
-                    return;
-                }
-                setSignedInUser({ name: user.name, email: user.email.trim().toLowerCase() });
-            } catch (error) {
-                showLocalStorageError(error);
-            }
-        }
+    document.getElementById('resendCode').addEventListener('click', async () => {
+      if (!pendingRegistration) return;
+      const button = document.getElementById('resendCode');
+      const result = await submitWithButton('register', pendingRegistration, button);
+      if (result) showStatus('Yangi tasdiqlash kodi emailingizga yuborildi.', true);
+    });
 
-        // 1. KIRISH QISMI
-        loginForm.addEventListener('submit', event => {
-            event.preventDefault();
-            clearAuthMessage();
+    document.getElementById('backToRegister').addEventListener('click', () => {
+      if (busy) return;
+      pendingRegistration = null;
+      document.getElementById('verifyForm').reset();
+      loginTab.parentElement.hidden = false;
+      showTab('register');
+    });
 
-            const email = document.getElementById('emailInput').value.trim();
-            const password = document.getElementById('passwordInput').value;
+    async function handleGoogleCredential(response) {
+      const button = document.getElementById('googleButton');
+      button.dataset.label = '';
+      setBusy(true);
+      showStatus('');
+      try {
+        const result = await requestAccount('google', { idToken: response.credential });
+        await completeSignIn(result);
+      } catch (error) {
+        showStatus(error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
 
-            if (!isValidEmail(email)) {
-                setAuthMessage('auth.emailInvalid');
-                return;
-            }
+    function initializeGoogleSignIn() {
+      if (!window.google?.accounts?.id) {
+        document.getElementById('googleFallback').hidden = false;
+        return;
+      }
+      window.google.accounts.id.initialize({
+        client_id: '499001615599-oiaag765cv1uc43no0t34p90krs86kt3.apps.googleusercontent.com',
+        callback: handleGoogleCredential
+      });
+      window.google.accounts.id.renderButton(document.getElementById('googleButton'), {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        shape: 'rectangular',
+        text: 'continue_with',
+        width: 240
+      });
+    }
+    window.initializeGoogleSignIn = initializeGoogleSignIn;
+    document.getElementById('googleFallback').addEventListener('click', () => {
+      showStatus('Google xizmati yuklanmadi. Sahifani yangilab qayta urinib ko‘ring.');
+    });
 
-            signIn(email, password);
-        });
-
-        // 2. RO'YXATDAN O'TISH VA TASDIQLASH KODINI KO'RSATISH
-        registerForm.addEventListener('submit', event => {
-            event.preventDefault();
-            clearAuthMessage();
-
-            const name = document.getElementById('nameInput').value.trim();
-            const email = document.getElementById('regEmailInput').value.trim();
-            const password = document.getElementById('regPasswordInput').value;
-
-            if (!isValidEmail(email)) {
-                setAuthMessage('auth.registerEmailInvalid');
-                return;
-            }
-
-            if (password.length < 8) {
-                setAuthMessage('auth.passwordTooShort');
-                return;
-            }
-
-            try {
-                if (findLocalUser(email)) {
-                    setAuthMessage('auth.duplicateEmail');
-                    return;
-                }
-            } catch (error) {
-                showLocalStorageError(error);
-                return;
-            }
-
-            generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
-            pendingUserData = { name, email, password };
-            codeAlertValue.textContent = generatedCode;
-            codeAlert.showModal();
-
-            registerForm.classList.remove('active-form');
-            verifyForm.classList.add('active-form');
-            authTabsContainer.style.display = 'none';
-            updateAuthTitle();
-        });
-
-        // 3. KODNI TASDIQLASH VA SAQLASH
-        verifyForm.addEventListener('submit', event => {
-            event.preventDefault();
-            const enteredCode = document.getElementById('verifyCodeInput').value.trim();
-
-            if (enteredCode === generatedCode) {
-                try {
-                    const users = readLegacyUsers();
-                    if (users.some(user =>
-                        typeof user.email === 'string' &&
-                        user.email.trim().toLowerCase() === pendingUserData.email.trim().toLowerCase()
-                    )) {
-                        setAuthMessage('auth.duplicateEmail');
-                        return;
-                    }
-                    users.push({
-                        id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-                        ...pendingUserData
-                    });
-                    localStorage.setItem('ilyosUsers', JSON.stringify(users));
-                    setSignedInUser({
-                        name: pendingUserData.name,
-                        email: pendingUserData.email.trim().toLowerCase()
-                    }, 'auth.registerSuccess');
-                } catch (error) {
-                    showLocalStorageError(error);
-                }
-            } else {
-                setAuthMessage('auth.codeInvalid');
-            }
-        });
-
-        const showLocalOnlyMessage = () => setAuthMessage('auth.localOnlyGoogle');
-        document.getElementById('googleLoginBtn').addEventListener('click', showLocalOnlyMessage);
-        document.getElementById('googleRegisterBtn').addEventListener('click', showLocalOnlyMessage);
-    </script>
+    document.querySelectorAll('.primary-button').forEach(button => {
+      button.dataset.label = button.textContent;
+    });
+    fetch(accountApi, { credentials: 'include' })
+      .then(async response => {
+        if (response.status === 401) return;
+        if (!response.ok) throw new Error(`Account session request failed (${response.status}).`);
+        await completeSignIn(await response.json());
+      })
+      .catch(error => console.error('Existing account session could not be loaded:', error));
+  </script>
 </body>
 </html>

@@ -178,7 +178,7 @@ createServer(async (request, response) => {
   }
 
   if (pathname === '/') {
-    response.writeHead(302, { Location: '/AI.html' });
+    response.writeHead(302, { Location: '/index.html' });
     response.end();
     return;
   }
@@ -208,6 +208,6 @@ createServer(async (request, response) => {
     response.end('Internal server error');
   }
 }).listen(port, '127.0.0.1', () => {
-  console.log(`Ilyos server: http://127.0.0.1:${port}/AI.html`);
+  console.log(`Ilyos server: http://127.0.0.1:${port}/index.html`);
   if (!ai) console.warn('GEMINI_API_KEY sozlanmagan; .env fayliga yangi kalit kiriting.');
 });

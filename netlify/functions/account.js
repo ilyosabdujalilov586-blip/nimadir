@@ -1,7 +1,6 @@
 const { jsonResponse } = require('./_shared.cjs');
 const {
   authenticateWithGoogle,
-  createAccount,
   getAccount,
   login,
   migrateLegacyAccount,
@@ -10,6 +9,8 @@ const {
   readSession,
   sessionCookie,
   signSession,
+  startAccountRegistration,
+  verifyAccountRegistration,
   toPublicUser
 } = require('./_account-store.cjs');
 
@@ -20,10 +21,16 @@ function responseForError(error) {
     account_request_failed: 500,
     account_not_found: 404,
     email_exists: 409,
+    email_service_not_configured: 503,
+    email_delivery_failed: 502,
     invalid_account: 400,
     invalid_credentials: 401,
     invalid_google_credential: 401,
-    google_not_configured: 503
+    google_not_configured: 503,
+    invalid_verification_code: 400,
+    verification_expired: 400,
+    verification_attempts_exceeded: 429,
+    verification_rate_limited: 429
   };
   return jsonResponse(statuses[error] || 500, { error: error || 'account_request_failed' });
 }
@@ -69,7 +76,11 @@ exports.handler = async event => {
 
     let result;
     if (body.action === 'register') {
-      result = await createAccount(body);
+      result = await startAccountRegistration(body);
+      if (result.error) return responseForError(result.error);
+      return jsonResponse(200, { pending: true }, { 'Cache-Control': 'no-store' });
+    } else if (body.action === 'verify') {
+      result = await verifyAccountRegistration(body);
     } else if (body.action === 'login') {
       result = await login(body);
     } else if (body.action === 'migrate') {
