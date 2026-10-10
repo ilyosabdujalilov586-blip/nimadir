@@ -14,10 +14,11 @@ const modelIds = new Set(models.map(({ id }) => id));
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8'
+  '.js': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml'
 };
 const publicFiles = new Set([
-  '/AI.html', '/aloqa.html', '/home.html', '/index.html', '/language.js',
+  '/AI.html', '/aloqa.html', '/favicon.svg', '/home.html', '/index.html', '/language.js',
   '/kutubxona.html', '/main.css', '/main.js', '/main-2.js', '/xizmatlar.html'
 ]);
 
@@ -59,13 +60,21 @@ async function readJson(request, maxBytes = 32_768) {
 
 async function handleAccountApi(request, response, handler) {
   let body = '';
+  let parsedBody = {};
   if (request.method !== 'GET') {
     try {
-      body = JSON.stringify(await readJson(request, 1_048_576));
+      parsedBody = await readJson(request, 1_048_576);
+      body = JSON.stringify(parsedBody);
     } catch {
       sendJson(response, 400, { error: 'invalid_request' });
       return;
     }
+  }
+
+  if (handler === accountHandler && parsedBody.action === 'register' &&
+      (!process.env.NETLIFY_SITE_ID || !process.env.NETLIFY_AUTH_TOKEN)) {
+    sendJson(response, 503, { error: 'account_storage_not_configured' });
+    return;
   }
 
   const result = await handler({

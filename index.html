@@ -62,9 +62,14 @@
       font: 700 21px "Space Grotesk", sans-serif;
       letter-spacing: -.04em;
     }
+    .mobile-brand { display: none; }
     .brand img {
       width: 42px;
       height: 42px;
+      padding: 8px;
+      border: 1px solid rgba(178, 154, 255, .32);
+      border-radius: 13px;
+      background: linear-gradient(145deg, rgba(103, 122, 255, .22), rgba(194, 97, 223, .16));
       filter: drop-shadow(0 6px 20px rgba(134, 94, 255, .45));
     }
     .eyebrow {
@@ -226,6 +231,19 @@
       transform: translateY(-1px);
     }
     .primary-button:disabled { cursor: wait; opacity: .65; }
+    .primary-button:disabled::before {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      margin-right: 9px;
+      vertical-align: -2px;
+      border: 2px solid rgba(255, 255, 255, .38);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: button-spin .7s linear infinite;
+      content: "";
+    }
+    @keyframes button-spin { to { transform: rotate(360deg); } }
     .divider {
       display: flex;
       align-items: center;
@@ -240,7 +258,22 @@
       background: var(--line);
       content: "";
     }
-    #googleButton { display: flex; justify-content: center; min-height: 42px; }
+    #googleButton {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(163, 177, 212, .16);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .035);
+      transition: border-color .2s ease, background .2s ease;
+    }
+    #googleButton:hover {
+      border-color: rgba(173, 148, 255, .38);
+      background: rgba(139, 107, 255, .08);
+    }
+    #googleButton iframe { max-width: 100%; }
     .google-fallback {
       display: inline-flex;
       min-height: 42px;
@@ -256,6 +289,38 @@
     }
     .google-fallback[hidden] { display: none; }
     .google-fallback svg { width: 18px; height: 18px; }
+    .verification-dialog {
+      width: min(440px, calc(100vw - 32px));
+      max-width: none;
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+      padding: clamp(23px, 6vw, 34px);
+      border: 1px solid rgba(167, 177, 210, .22);
+      border-radius: 23px;
+      background: linear-gradient(155deg, #1a2034, #0d111e 88%);
+      box-shadow: 0 28px 100px rgba(0, 0, 0, .62), 0 0 65px rgba(127, 94, 255, .17);
+      color: var(--text);
+    }
+    .verification-dialog::backdrop {
+      background: rgba(4, 6, 13, .76);
+      backdrop-filter: blur(9px);
+    }
+    .verify-badge {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 19px;
+      place-items: center;
+      border: 1px solid rgba(161, 134, 255, .3);
+      border-radius: 15px;
+      background: rgba(132, 103, 245, .13);
+      color: #c7b3ff;
+    }
+    .verify-badge svg { width: 22px; height: 22px; }
+    .verification-dialog .card-heading { margin-bottom: 23px; }
+    .verification-dialog .verify-note { margin: 9px 0 0; overflow-wrap: anywhere; }
+    .verification-dialog .verify-note strong { color: #e0d5ff; }
+    .verification-dialog .status { margin-top: 12px; }
     .status {
       min-height: 18px;
       margin: 12px 0 0;
@@ -276,7 +341,8 @@
       cursor: pointer;
       font-size: 12px;
     }
-    .resend-button:hover { color: white; text-decoration: underline; }
+    .resend-button:hover:not(:disabled) { color: white; text-decoration: underline; }
+    .resend-button:disabled { cursor: wait; opacity: .65; }
     .back-link {
       margin: 12px auto 0;
       border: 0;
@@ -308,6 +374,9 @@
       }
       .story { display: none; }
       .auth-card { padding: clamp(24px, 7vw, 36px); }
+      .mobile-brand { display: inline-flex; margin-bottom: 22px; }
+      .mobile-brand img { width: 34px; height: 34px; }
+      .mobile-brand span { font-size: 18px; }
     }
     @media (max-width: 390px) {
       .auth-layout { padding: 16px; }
@@ -342,6 +411,10 @@
 
     <section class="auth-card" aria-labelledby="formTitle">
       <div id="authForms">
+        <a class="brand mobile-brand" href="./home.html">
+          <img src="favicon.svg" alt="">
+          <span>ILYOS AI</span>
+        </a>
         <div class="card-heading">
           <h2 id="formTitle">Hisobingizga kiring</h2>
           <p id="formSubtitle">Ilyos AI’dan foydalanishni davom ettiring.</p>
@@ -395,22 +468,6 @@
           <button class="primary-button" id="registerSubmit" type="submit">Ro‘yxatdan o‘tish</button>
         </form>
 
-        <section id="verifyPanel" hidden aria-labelledby="verifyTitle">
-          <div class="card-heading">
-            <h2 id="verifyTitle">Emailni tasdiqlang</h2>
-            <p class="verify-note">Tasdiqlash kodini emailingizga yubordik: <strong id="verifyEmail"></strong></p>
-          </div>
-          <form id="verifyForm" class="form-fields">
-            <div class="field">
-              <label for="verifyCode">6 xonali tasdiqlash kodi</label>
-              <input class="code-input" id="verifyCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
-            </div>
-            <button class="primary-button" id="verifySubmit" type="submit">Kodni tasdiqlash</button>
-          </form>
-          <button class="resend-button" id="resendCode" type="button">Kodni qayta yuborish</button>
-          <button class="back-link" id="backToRegister" type="button">← Ro‘yxatdan o‘tishga qaytish</button>
-        </section>
-
         <div id="socialLogin">
           <div class="divider"><span>yoki</span></div>
           <div id="googleButton" aria-label="Google orqali kirish"></div>
@@ -425,22 +482,48 @@
     </section>
   </main>
 
+  <dialog class="verification-dialog" id="verifyDialog" aria-labelledby="verifyTitle">
+    <span class="verify-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <div class="card-heading">
+      <h2 id="verifyTitle">Emailni tasdiqlang</h2>
+      <p class="verify-note">Tasdiqlash kodini emailingizga yubordik: <strong id="verifyEmail"></strong></p>
+    </div>
+    <form id="verifyForm" class="form-fields">
+      <div class="field">
+        <label for="verifyCode">6 xonali tasdiqlash kodi</label>
+        <input class="code-input" id="verifyCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+      </div>
+      <button class="primary-button" id="verifySubmit" type="submit">Kodni tasdiqlash</button>
+    </form>
+    <button class="resend-button" id="resendCode" type="button">Kodni qayta yuborish</button>
+    <button class="back-link" id="backToRegister" type="button">← Ro‘yxatdan o‘tishga qaytish</button>
+    <p class="status" id="verifyStatus" role="status" aria-live="polite"></p>
+  </dialog>
+
   <script>
     const accountApi = './api/account';
     const loginTab = document.getElementById('loginTab');
     const registerTab = document.getElementById('registerTab');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    const verifyPanel = document.getElementById('verifyPanel');
+    const verifyDialog = document.getElementById('verifyDialog');
+    const verifyStatus = document.getElementById('verifyStatus');
+    const resendButton = document.getElementById('resendCode');
     const socialLogin = document.getElementById('socialLogin');
     const authStatus = document.getElementById('authStatus');
     let pendingRegistration = null;
+    let resendSeconds = 0;
+    let resendTimer;
     let busy = false;
+    resendButton.dataset.label = resendButton.textContent;
 
     const apiErrors = {
       account_not_found: 'Bu email bilan hisob topilmadi.',
+      account_storage_not_configured: '.env faylida NETLIFY_SITE_ID va NETLIFY_AUTH_TOKEN sozlang.',
       email_exists: 'Bu email allaqachon ro‘yxatdan o‘tgan. Kirishni sinab ko‘ring.',
-      email_service_not_configured: 'Email yuborish xizmati sozlanmagan. Administrator bilan bog‘laning.',
+      email_service_not_configured: '.env faylida RESEND_API_KEY va RESEND_FROM_EMAIL sozlang.',
       email_delivery_failed: 'Tasdiqlash kodi yuborilmadi. Birozdan so‘ng qayta urinib ko‘ring.',
       google_not_configured: 'Google orqali kirish hozircha sozlanmagan.',
       invalid_account: 'Ism, email yoki parol noto‘g‘ri. Parol kamida 8 ta belgidan iborat bo‘lsin.',
@@ -452,17 +535,41 @@
       verification_rate_limited: 'Yangi kod yuborishdan oldin bir daqiqa kuting.'
     };
 
-    function showStatus(message, success = false) {
-      authStatus.textContent = message;
-      authStatus.classList.toggle('success', success);
+    function showStatus(message, success = false, target = authStatus) {
+      target.textContent = message;
+      target.classList.toggle('success', success);
     }
 
     function setBusy(value, button) {
       busy = value;
       document.querySelectorAll('.primary-button, .tab, .resend-button, .back-link').forEach(control => {
-        control.disabled = value;
+        control.disabled = value || control.id === 'resendCode' && resendSeconds > 0;
       });
-      if (button) button.textContent = value ? 'Kutilmoqda…' : button.dataset.label;
+      if (button) {
+        button.textContent = value
+          ? 'Kutilmoqda…'
+          : button.id === 'resendCode' && resendSeconds > 0
+            ? `Kodni qayta yuborish (${resendSeconds})`
+            : button.dataset.label;
+      }
+    }
+
+    function startResendCountdown() {
+      window.clearInterval(resendTimer);
+      resendSeconds = 60;
+      const updateCountdown = () => {
+        resendButton.disabled = busy || resendSeconds > 0;
+        resendButton.textContent = resendSeconds > 0
+          ? `Kodni qayta yuborish (${resendSeconds})`
+          : resendButton.dataset.label;
+        if (resendSeconds === 0) {
+          window.clearInterval(resendTimer);
+          return;
+        }
+        resendSeconds -= 1;
+      };
+      updateCountdown();
+      resendTimer = window.setInterval(updateCountdown, 1000);
     }
 
     async function requestAccount(action, data = {}) {
@@ -472,10 +579,14 @@
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action, ...data })
+          body: JSON.stringify({ action, ...data }),
+          signal: AbortSignal.timeout(15_000)
         });
       } catch (error) {
         console.error('Account request failed:', error);
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+          throw new Error('So‘rov 15 soniyada javob bermadi. Internetni tekshirib, qayta urinib ko‘ring.');
+        }
         throw new Error('Internet bilan aloqa yo‘q. Ulanishni tekshirib, qayta urinib ko‘ring.');
       }
 
@@ -492,7 +603,6 @@
 
     function showTab(mode) {
       if (busy) return;
-      verifyPanel.hidden = true;
       loginForm.hidden = mode !== 'login';
       registerForm.hidden = mode !== 'register';
       socialLogin.hidden = false;
@@ -518,20 +628,20 @@
       window.location.assign('./home.html');
     }
 
-    async function submitWithButton(action, data, button, successMessage) {
+    async function submitWithButton(action, data, button, successMessage, statusElement = authStatus) {
       if (busy) return;
       button.dataset.label ||= button.textContent;
       setBusy(true, button);
-      showStatus('');
+      showStatus('', false, statusElement);
       try {
         const result = await requestAccount(action, data);
-        if (successMessage) showStatus(successMessage, true);
+        if (successMessage) showStatus(successMessage, true, statusElement);
         return result;
       } catch (error) {
-        showStatus(error.message);
+        showStatus(error.message, false, statusElement);
         return null;
       } finally {
-        setBusy(false);
+        setBusy(false, button);
       }
     }
 
@@ -561,15 +671,12 @@
         return;
       }
       document.getElementById('verifyEmail').textContent = pendingRegistration.email;
-      document.getElementById('formTitle').textContent = 'Emailni tasdiqlang';
-      document.getElementById('formSubtitle').textContent = 'Kodni emailingizdan toping va quyida kiriting.';
-      loginForm.hidden = true;
-      registerForm.hidden = true;
-      loginTab.parentElement.hidden = true;
-      socialLogin.hidden = true;
-      verifyPanel.hidden = false;
+      document.getElementById('verifyForm').reset();
+      showStatus('');
+      showStatus('Tasdiqlash kodi emailingizga yuborildi.', true, verifyStatus);
+      startResendCountdown();
+      verifyDialog.showModal();
       document.getElementById('verifyCode').focus();
-      showStatus('Tasdiqlash kodi emailingizga yuborildi.', true);
     });
 
     document.getElementById('verifyForm').addEventListener('submit', async event => {
@@ -582,29 +689,36 @@
       const result = await submitWithButton('verify', {
         email: pendingRegistration.email,
         code: document.getElementById('verifyCode').value.trim()
-      }, button);
+      }, button, undefined, verifyStatus);
       if (result) {
+        verifyDialog.close();
         pendingRegistration = null;
         await completeSignIn(result);
-      } else if (authStatus.textContent.includes('Urinishlar limiti')) {
+      } else if (verifyStatus.textContent.includes('Urinishlar limiti')) {
         pendingRegistration = null;
       }
     });
 
     document.getElementById('resendCode').addEventListener('click', async () => {
-      if (!pendingRegistration) return;
-      const button = document.getElementById('resendCode');
-      const result = await submitWithButton('register', pendingRegistration, button);
-      if (result) showStatus('Yangi tasdiqlash kodi emailingizga yuborildi.', true);
+      if (!pendingRegistration || resendSeconds > 0) return;
+      const result = await submitWithButton(
+        'register',
+        pendingRegistration,
+        resendButton,
+        'Yangi tasdiqlash kodi emailingizga yuborildi.',
+        verifyStatus
+      );
+      if (result) startResendCountdown();
     });
 
     document.getElementById('backToRegister').addEventListener('click', () => {
       if (busy) return;
       pendingRegistration = null;
+      verifyDialog.close();
       document.getElementById('verifyForm').reset();
-      loginTab.parentElement.hidden = false;
       showTab('register');
     });
+    verifyDialog.addEventListener('cancel', event => event.preventDefault());
 
     async function handleGoogleCredential(response) {
       const button = document.getElementById('googleButton');

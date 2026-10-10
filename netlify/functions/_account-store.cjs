@@ -194,6 +194,9 @@ async function startAccountRegistration({ name, email, password }) {
       typeof password !== 'string' || password.length < 8 || Buffer.byteLength(password, 'utf8') > 1024) {
     return { error: 'invalid_account' };
   }
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+    return { error: 'email_service_not_configured' };
+  }
 
   const accounts = getAccounts();
   if (await accounts.get(accountKey(normalizedEmail), { type: 'json' })) {

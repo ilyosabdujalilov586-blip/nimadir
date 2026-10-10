@@ -17,6 +17,7 @@ const {
 function responseForError(error) {
   const statuses = {
     auth_not_configured: 503,
+    account_storage_not_configured: 503,
     account_storage_failed: 503,
     account_request_failed: 500,
     account_not_found: 404,
