@@ -28,8 +28,8 @@ function responseForError(error) {
   return jsonResponse(statuses[error] || 500, { error: error || 'account_request_failed' });
 }
 
-function accountResponse(event, user) {
-  const session = signSession(user.email);
+async function accountResponse(event, user) {
+  const session = await signSession(user.email);
   return jsonResponse(200, { user }, {
     'Cache-Control': 'no-store',
     'Set-Cookie': sessionCookie(event, session)
@@ -53,7 +53,7 @@ exports.handler = async event => {
 
   try {
     if (method === 'GET' || body.action === 'session') {
-      const session = readSession(event);
+      const session = await readSession(event);
       if (!session) return jsonResponse(401, { error: 'not_authenticated' }, { 'Cache-Control': 'no-store' });
       const user = await getAccount(session.email);
       if (!user) return jsonResponse(401, { error: 'not_authenticated' }, { 'Cache-Control': 'no-store' });
@@ -82,7 +82,7 @@ exports.handler = async event => {
 
     if (result.error) return responseForError(result.error);
     if (!normalizeEmail(result.user?.email)) return jsonResponse(500, { error: 'account_request_failed' });
-    return accountResponse(event, result.user);
+    return await accountResponse(event, result.user);
   } catch (error) {
     const code = error.code === 'auth_not_configured' ? error.code : 'account_request_failed';
     console.error('Account request failed:', code);
