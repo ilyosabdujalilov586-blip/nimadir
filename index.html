@@ -795,43 +795,23 @@
         }
 
         async function requestAccount(action, data) {
-            const requestBody = { action, ...data };
-            const requestUrl = `${accountApiBase}/api/account`;
-            try {
-                const response = await fetch(requestUrl, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-                const result = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    const errorCode = result.error || 'account_request_failed';
-                    if (['account_not_found', 'email_exists', 'invalid_account', 'invalid_credentials', 'account_request_failed', 'auth_not_configured', 'google_not_configured', 'invalid_google_credential'].includes(errorCode)) {
-                        return fallbackLocalAccountRequest(action, data);
-                    }
-                    const error = new Error(errorCode);
-                    error.code = errorCode;
-                    throw error;
-                }
-                return result.user;
-            } catch (error) {
-                const errorCode = error?.code || error?.message || 'account_request_failed';
-                const shouldFallBack = ['account_not_found', 'email_exists', 'invalid_account', 'invalid_credentials', 'account_request_failed', 'auth_not_configured', 'google_not_configured', 'invalid_google_credential'].includes(errorCode)
-                    || String(errorCode).toLowerCase().includes('fetch')
-                    || String(errorCode).toLowerCase().includes('network');
-                if (shouldFallBack) {
-                    return fallbackLocalAccountRequest(action, data);
-                }
+            const response = await fetch(`${accountApiBase}/api/account`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...data })
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                const error = new Error(result.error || 'account_request_failed');
+                error.code = result.error;
                 throw error;
             }
+            return result.user;
         }
 
         function showAccountError(error, fallbackKey = 'auth.cloudUnavailable') {
-            const code = error?.code || error?.message || 'account_request_failed';
-            if (!['account_request_failed', 'auth_not_configured', 'google_not_configured'].includes(code)) {
-                console.error('Account request failed:', error);
-            }
+            console.error('Account request failed:', error);
             const messageKeys = {
                 account_not_found: 'auth.noAccount',
                 email_exists: 'auth.duplicateEmail',
@@ -841,80 +821,12 @@
                 google_not_configured: 'auth.cloudUnavailable',
                 invalid_google_credential: 'auth.googleError'
             };
-            setAuthMessage(messageKeys[code] || fallbackKey);
+            setAuthMessage(messageKeys[error.code] || fallbackKey);
         }
 
         function readLegacyUsers() {
             const users = JSON.parse(localStorage.getItem('ilyosUsers') || '[]');
             return Array.isArray(users) ? users : [];
-        }
-
-        function findLegacyUserByEmail(email) {
-            const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-            return readLegacyUsers().find(user =>
-                typeof user.email === 'string' &&
-                user.email.trim().toLowerCase() === normalizedEmail
-            );
-        }
-
-        function writeLegacyUsers(users) {
-            localStorage.setItem('ilyosUsers', JSON.stringify(Array.isArray(users) ? users : []));
-        }
-
-        function fallbackLocalAccountRequest(action, data) {
-            const email = typeof data?.email === 'string' ? data.email.trim().toLowerCase() : '';
-            const password = typeof data?.password === 'string' ? data.password : '';
-
-            if (action === 'login') {
-                const user = findLegacyUserByEmail(email);
-                if (!user) {
-                    throw Object.assign(new Error('account_not_found'), { code: 'account_not_found' });
-                }
-                if (user.password !== password || user.password === 'GOOGLE_AUTH_USER') {
-                    throw Object.assign(new Error('invalid_credentials'), { code: 'invalid_credentials' });
-                }
-                return { ...user, email: user.email.trim().toLowerCase() };
-            }
-
-            if (action === 'register') {
-                const existingUser = findLegacyUserByEmail(email);
-                if (existingUser) {
-                    throw Object.assign(new Error('email_exists'), { code: 'email_exists' });
-                }
-                const user = {
-                    id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-                    name: (data?.name || 'Foydalanuvchi').trim() || 'Foydalanuvchi',
-                    email: email,
-                    password
-                };
-                const users = readLegacyUsers();
-                users.push(user);
-                writeLegacyUsers(users);
-                return user;
-            }
-
-            if (action === 'migrate') {
-                const existingUser = findLegacyUserByEmail(email);
-                if (!existingUser) {
-                    const user = {
-                        id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-                        name: (data?.name || email.split('@')[0] || 'Foydalanuvchi').trim() || 'Foydalanuvchi',
-                        email: email,
-                        password
-                    };
-                    const users = readLegacyUsers();
-                    users.push(user);
-                    writeLegacyUsers(users);
-                    return user;
-                }
-                existingUser.password = password;
-                writeLegacyUsers(readLegacyUsers().map(user =>
-                    typeof user.email === 'string' && user.email.trim().toLowerCase() === email ? existingUser : user
-                ));
-                return { ...existingUser, email: existingUser.email.trim().toLowerCase() };
-            }
-
-            throw Object.assign(new Error('auth_not_configured'), { code: 'auth_not_configured' });
         }
 
         async function signIn(email, password) {
@@ -927,7 +839,10 @@
                     return;
                 }
 
-                const legacyUser = findLegacyUserByEmail(email);
+                const legacyUser = readLegacyUsers().find(user =>
+                    typeof user.email === 'string' &&
+                    user.email.trim().toLowerCase() === email.trim().toLowerCase()
+                );
                 if (!legacyUser) {
                     showAccountError(error);
                     return;
@@ -947,7 +862,7 @@
                         typeof item.email === 'string' &&
                         item.email.trim().toLowerCase() !== email.trim().toLowerCase()
                     );
-                    writeLegacyUsers(remainingUsers);
+                    localStorage.setItem('ilyosUsers', JSON.stringify(remainingUsers));
                     setSignedInUser(user);
                 } catch (migrationError) {
                     showAccountError(migrationError);
