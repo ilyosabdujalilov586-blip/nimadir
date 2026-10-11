@@ -1,5 +1,8 @@
 const { createHash, createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } = require('node:crypto');
+const { mkdir, readFile, writeFile } = require('node:fs/promises');
+const path = require('node:path');
 const { promisify } = require('node:util');
+const nodemailer = require('nodemailer');
 const { getStore } = require('@netlify/blobs');
 
 const scryptAsync = promisify(scrypt);
@@ -9,13 +12,75 @@ const VERIFICATION_LIFETIME = 10 * 60 * 1000;
 const VERIFICATION_RESEND_DELAY = 60 * 1000;
 const MAX_VERIFICATION_ATTEMPTS = 5;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LOCAL_STORE_ROOT = path.join(__dirname, '..', '..', '.local-store');
+
+async function readLocalStore(name) {
+  const filePath = path.join(LOCAL_STORE_ROOT, `${name}.json`);
+  try {
+    const raw = await readFile(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
+}
+
+async function writeLocalStore(name, data) {
+  await mkdir(LOCAL_STORE_ROOT, { recursive: true });
+  const filePath = path.join(LOCAL_STORE_ROOT, `${name}.json`);
+  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+function createLocalStore(name) {
+  return {
+    async get(key, options = {}) {
+      const data = await readLocalStore(name);
+      const value = data[key];
+      if (value === undefined) return null;
+      return options.type === 'json' ? value : String(value);
+    },
+    async set(key, value, options = {}) {
+      const data = await readLocalStore(name);
+      const previous = data[key];
+      data[key] = value;
+      await writeLocalStore(name, data);
+      return { modified: previous !== value };
+    },
+    async setJSON(key, value, options = {}) {
+      const data = await readLocalStore(name);
+      if (options.onlyIfNew && Object.prototype.hasOwnProperty.call(data, key)) {
+        return { modified: false };
+      }
+      data[key] = value;
+      await writeLocalStore(name, data);
+      return { modified: true };
+    },
+    async delete(key) {
+      const data = await readLocalStore(name);
+      if (!Object.prototype.hasOwnProperty.call(data, key)) return false;
+      delete data[key];
+      await writeLocalStore(name, data);
+      return true;
+    }
+  };
+}
+
+function hasNetlifyConfig() {
+  const siteId = process.env.NETLIFY_SITE_ID || '';
+  const token = process.env.NETLIFY_AUTH_TOKEN || '';
+  const placeholderPattern = /(?:replace|your_)/i;
+  return siteId.trim().length > 0 && token.trim().length > 0 &&
+    !placeholderPattern.test(siteId) && !placeholderPattern.test(token);
+}
 
 function getStoreForSite(name) {
-  const options = { consistency: 'strong' };
-  if (process.env.NETLIFY_SITE_ID && process.env.NETLIFY_AUTH_TOKEN) {
-    options.siteID = process.env.NETLIFY_SITE_ID;
-    options.token = process.env.NETLIFY_AUTH_TOKEN;
+  if (!hasNetlifyConfig()) {
+    return createLocalStore(name);
   }
+
+  const options = { consistency: 'strong' };
+  options.siteID = process.env.NETLIFY_SITE_ID;
+  options.token = process.env.NETLIFY_AUTH_TOKEN;
   return getStore(name, options);
 }
 
@@ -153,38 +218,59 @@ function escapeHtml(value) {
   })[character]);
 }
 
-async function sendVerificationEmail(email, name, code) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL;
-  if (!apiKey || !from) return { error: 'email_service_not_configured' };
+function canShowLocalVerificationCode() {
+  return process.env.NODE_ENV !== 'production' &&
+    !process.env.NETLIFY &&
+    !process.env.NETLIFY_SITE_ID &&
+    !process.env.NETLIFY_AUTH_TOKEN;
+}
 
-  let response;
+async function sendVerificationEmail(email, name, code, purpose = 'registration') {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  const hasPlaceholderValue = value => typeof value === 'string' && /(?:replace|your_|xxx)/i.test(value);
+  const isLogin = purpose === 'login';
+  const action = isLogin ? 'hisobingizga kirishni tasdiqlash' : 'hisobingizni tasdiqlash';
+
+  if (!gmailUser || !gmailPass || hasPlaceholderValue(gmailUser) || hasPlaceholderValue(gmailPass)) {
+    console.warn('[Email] Gmail sozlanmagan. .env fayliga GMAIL_USER va GMAIL_APP_PASSWORD qo\'shing.');
+    return { error: 'email_service_not_configured' };
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: gmailUser,
+      pass: gmailPass
+    }
+  });
+
+  const htmlBody = `
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#080b14;padding:32px;border-radius:16px;border:1px solid rgba(167,177,210,.2)">
+      <h2 style="color:#c4b3ff;font-size:22px;margin:0 0 16px">Ilyos AI — ${isLogin ? 'Kirish kodi' : 'Tasdiqlash kodi'}</h2>
+      <p style="color:#b6bfd3;font-size:15px">Salom, <strong style="color:#f6f7fb">${escapeHtml(name)}</strong>!</p>
+      <p style="color:#b6bfd3;font-size:14px">Ilyos ${action} uchun quyidagi kodni kiriting:</p>
+      <div style="background:rgba(139,107,255,.12);border:1px solid rgba(174,149,255,.25);border-radius:12px;padding:20px;text-align:center;margin:20px 0">
+        <span style="font-size:36px;font-weight:700;letter-spacing:10px;color:#ffffff">${code}</span>
+      </div>
+      <p style="color:#77829a;font-size:12px">Kod <strong>10 daqiqa</strong> davomida amal qiladi. Agar bu siz bo'lmasangiz, kodni hech kimga bermang va xabarni e'tiborsiz qoldiring.</p>
+    </div>
+  `;
+
   try {
-    response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from,
-        to: [email],
-        subject: 'Ilyos hisobingiz uchun tasdiqlash kodi',
-        text: `Salom, ${name}!\n\nIlyos hisobingizni tasdiqlash kodi: ${code}\nKod 10 daqiqa davomida amal qiladi.`,
-        html: `<p>Salom, ${escapeHtml(name)}!</p><p>Ilyos hisobingizni tasdiqlash kodi:</p><p style="font-size:28px;font-weight:bold;letter-spacing:8px">${code}</p><p>Kod 10 daqiqa davomida amal qiladi.</p>`
-      }),
-      signal: AbortSignal.timeout(10_000)
+    await transporter.sendMail({
+      from: `"Ilyos AI" <${gmailUser}>`,
+      to: email,
+      subject: `Ilyos AI — ${isLogin ? 'Kirish kodi' : 'Tasdiqlash kodi'}`,
+      text: `Salom, ${name}!\n\nIlyos ${action} kodi: ${code}\nKod 10 daqiqa davomida amal qiladi. Agar bu siz bo'lmasangiz, kodni hech kimga bermang.`,
+      html: htmlBody
     });
-  } catch {
-    console.error('Verification email delivery failed.');
+    console.log('[Email] Tasdiqlash kodi yuborildi:', email);
+    return {};
+  } catch (error) {
+    console.error('[Email] Yuborishda xatolik:', error.message);
     return { error: 'email_delivery_failed' };
   }
-
-  if (!response.ok) {
-    console.error('Verification email provider rejected the request:', response.status);
-    return { error: 'email_delivery_failed' };
-  }
-  return {};
 }
 
 async function startAccountRegistration({ name, email, password }) {
@@ -193,9 +279,6 @@ async function startAccountRegistration({ name, email, password }) {
   if (!normalizedEmail || !normalizedName || normalizedName.length > 100 ||
       typeof password !== 'string' || password.length < 8 || Buffer.byteLength(password, 'utf8') > 1024) {
     return { error: 'invalid_account' };
-  }
-  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
-    return { error: 'email_service_not_configured' };
   }
 
   const accounts = getAccounts();
@@ -230,6 +313,7 @@ async function startAccountRegistration({ name, email, password }) {
   await verifications.setJSON(key, pending);
   const delivery = await sendVerificationEmail(normalizedEmail, normalizedName, code);
   if (delivery.error) {
+    if (canShowLocalVerificationCode()) return { pending: true, devCode: code };
     const current = await verifications.get(key, { type: 'json' });
     if (current?.id === pending.id) await verifications.delete(key);
     return delivery;
@@ -275,6 +359,113 @@ async function verifyAccountRegistration({ email, code }) {
   const result = await getAccounts().setJSON(accountKey(normalizedEmail), user, { onlyIfNew: true });
   await verifications.delete(key);
   return result.modified ? { user: toPublicUser(user) } : { error: 'email_exists' };
+}
+
+function loginVerificationKey(email) {
+  return `login/${createHash('sha256').update(email).digest('hex')}`;
+}
+
+function verificationCodeHash(email, code, secret) {
+  return createHmac('sha256', secret).update(`${email}:${code}`).digest('hex');
+}
+
+async function sendLoginVerification(email, user, previous) {
+  const verifications = getEmailVerifications();
+  const key = loginVerificationKey(email);
+  const code = String(randomInt(100_000, 1_000_000));
+  const now = Date.now();
+  const pending = {
+    email,
+    name: typeof user.name === 'string' && user.name.trim() ? user.name.trim() : 'foydalanuvchi',
+    codeHash: verificationCodeHash(email, code, await getSessionSecret()),
+    attempts: 0,
+    createdAt: now,
+    expiresAt: now + VERIFICATION_LIFETIME
+  };
+
+  await verifications.setJSON(key, pending);
+  const delivery = await sendVerificationEmail(email, pending.name, code, 'login');
+  if (delivery.error) {
+    if (canShowLocalVerificationCode()) return { pending: true, devCode: code };
+    if (previous) await verifications.setJSON(key, previous);
+    else await verifications.delete(key);
+    return delivery;
+  }
+  return { pending: true };
+}
+
+async function startLoginVerification({ email, password }) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || typeof password !== 'string' || Buffer.byteLength(password, 'utf8') > 1024) {
+    return { error: 'invalid_credentials' };
+  }
+  const user = await getAccounts().get(accountKey(normalizedEmail), { type: 'json' });
+  if (!user) return { error: 'account_not_found' };
+  if (!await verifyPassword(password, user)) return { error: 'invalid_credentials' };
+
+  const verifications = getEmailVerifications();
+  const key = loginVerificationKey(normalizedEmail);
+  const existing = await verifications.get(key, { type: 'json' });
+  const now = Date.now();
+  if (existing && existing.expiresAt > now && now - existing.createdAt < VERIFICATION_RESEND_DELAY) {
+    return { pending: true };
+  }
+  return sendLoginVerification(normalizedEmail, user, existing);
+}
+
+async function resendLoginVerification({ email }) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return { error: 'invalid_verification_code' };
+
+  const verifications = getEmailVerifications();
+  const key = loginVerificationKey(normalizedEmail);
+  const existing = await verifications.get(key, { type: 'json' });
+  if (!existing || existing.expiresAt <= Date.now()) {
+    if (existing) await verifications.delete(key);
+    return { error: 'verification_expired' };
+  }
+  if (Date.now() - existing.createdAt < VERIFICATION_RESEND_DELAY) {
+    return { error: 'verification_rate_limited' };
+  }
+
+  const user = await getAccounts().get(accountKey(normalizedEmail), { type: 'json' });
+  if (!user) {
+    await verifications.delete(key);
+    return { error: 'account_not_found' };
+  }
+  return sendLoginVerification(normalizedEmail, user, existing);
+}
+
+async function verifyLoginVerification({ email, code }) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || typeof code !== 'string' || !/^\d{6}$/.test(code)) {
+    return { error: 'invalid_verification_code' };
+  }
+
+  const verifications = getEmailVerifications();
+  const key = loginVerificationKey(normalizedEmail);
+  const pending = await verifications.get(key, { type: 'json' });
+  if (!pending) return { error: 'verification_expired' };
+  if (pending.expiresAt <= Date.now()) {
+    await verifications.delete(key);
+    return { error: 'verification_expired' };
+  }
+
+  const codeHash = Buffer.from(verificationCodeHash(normalizedEmail, code, await getSessionSecret()), 'hex');
+  const expectedHash = Buffer.from(pending.codeHash, 'hex');
+  if (expectedHash.length !== codeHash.length || !timingSafeEqual(expectedHash, codeHash)) {
+    pending.attempts += 1;
+    if (pending.attempts >= MAX_VERIFICATION_ATTEMPTS) {
+      await verifications.delete(key);
+      return { error: 'verification_attempts_exceeded' };
+    }
+    await verifications.setJSON(key, pending);
+    return { error: 'invalid_verification_code' };
+  }
+
+  const user = await getAccounts().get(accountKey(normalizedEmail), { type: 'json' });
+  await verifications.delete(key);
+  return user ? { user: toPublicUser(user) } : { error: 'account_not_found' };
 }
 
 async function migrateLegacyAccount({ name, email, password }) {
@@ -326,7 +517,7 @@ async function authenticateWithGoogle({ idToken, accessToken }) {
   if (!response.ok) return { error: 'invalid_google_credential' };
   const profile = await response.json();
   const email = normalizeEmail(profile.email);
-  if (!email || profile.email_verified !== true && profile.email_verified !== 'true' ||
+  if (!email || (profile.email_verified !== true && profile.email_verified !== 'true') ||
       typeof profile.name !== 'string' || !profile.name.trim()) {
     return { error: 'invalid_google_credential' };
   }
@@ -388,8 +579,11 @@ module.exports = {
   readSession,
   sessionCookie,
   signSession,
+  startLoginVerification,
   startAccountRegistration,
   toPublicUser,
   validateChats,
-  verifyAccountRegistration
+  verifyLoginVerification,
+  verifyAccountRegistration,
+  resendLoginVerification
 };

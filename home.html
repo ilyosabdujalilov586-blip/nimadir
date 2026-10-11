@@ -810,7 +810,9 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const logoutError = document.getElementById('logoutError');
     const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    const accountApiBase = isLocalHost ? `http://${window.location.hostname}:5508` : '';
+    const accountApiBase = isLocalHost && window.location.port !== '5509'
+      ? `${window.location.protocol}//127.0.0.1:5509`
+      : '';
 
     function openOffcanvas() {
       profileOffcanvas.classList.add('open');
@@ -830,6 +832,11 @@
       logoutBtn.addEventListener('click', async () => {
         logoutBtn.disabled = true;
         logoutError.hidden = true;
+        if (isLocalHost) {
+          localStorage.removeItem('ilyosActiveUser');
+          window.location.href = './index.html';
+          return;
+        }
         try {
           const response = await fetch(`${accountApiBase}/api/account`, {
             method: 'POST',

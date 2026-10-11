@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer onload="initializeGoogleSignIn()"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       color-scheme: dark;
@@ -275,20 +275,19 @@
     }
     #googleButton iframe { max-width: 100%; }
     .google-fallback {
-      display: inline-flex;
-      min-height: 42px;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 1px solid rgba(190, 199, 220, .25);
-      border-radius: 10px;
-      background: #f8f9fc;
-      color: #292d35;
-      font-size: 13px;
-      font-weight: 600;
+      max-width: 380px;
+      margin: 12px auto 0;
+      padding: 10px 12px;
+      border: 1px solid rgba(175, 139, 255, .18);
+      border-radius: 12px;
+      background: rgba(139, 107, 255, .06);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: center;
     }
     .google-fallback[hidden] { display: none; }
-    .google-fallback svg { width: 18px; height: 18px; }
+
     .verification-dialog {
       width: min(440px, calc(100vw - 32px));
       max-width: none;
@@ -317,6 +316,28 @@
       color: #c7b3ff;
     }
     .verify-badge svg { width: 22px; height: 22px; }
+    .code-display-dialog { text-align: center; }
+    .code-display-dialog .verify-badge { margin-right: auto; margin-left: auto; }
+    .code-display-dialog .card-heading { margin-bottom: 20px; }
+    .code-display {
+      display: block;
+      margin: 20px 0 12px;
+      padding: 19px 14px;
+      border: 1px solid rgba(174, 149, 255, .32);
+      border-radius: 17px;
+      background: linear-gradient(135deg, rgba(104, 119, 255, .16), rgba(190, 91, 232, .15));
+      box-shadow: inset 0 1px rgba(255, 255, 255, .06), 0 12px 36px rgba(103, 81, 219, .12);
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(35px, 10vw, 44px);
+      font-weight: 700;
+      letter-spacing: .28em;
+      line-height: 1.2;
+      text-indent: .28em;
+      user-select: all;
+    }
+    .code-display-hint { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .code-display-dialog .primary-button { margin-top: 22px; }
     .verification-dialog .card-heading { margin-bottom: 23px; }
     .verification-dialog .verify-note { margin: 9px 0 0; overflow-wrap: anywhere; }
     .verification-dialog .verify-note strong { color: #e0d5ff; }
@@ -364,36 +385,8 @@
       outline: 2px solid #c8b6ff;
       outline-offset: 3px;
     }
-    @media (max-width: 900px) {
-      .auth-layout {
-        width: min(560px, 100%);
-        min-height: 100dvh;
-        grid-template-columns: 1fr;
-        gap: 28px;
-        padding: max(20px, env(safe-area-inset-top)) 22px max(20px, env(safe-area-inset-bottom));
-      }
-      .story { display: none; }
-      .auth-card { padding: clamp(24px, 7vw, 36px); }
-      .mobile-brand { display: inline-flex; margin-bottom: 22px; }
-      .mobile-brand img { width: 34px; height: 34px; }
-      .mobile-brand span { font-size: 18px; }
-    }
-    @media (max-width: 390px) {
-      .auth-layout { padding: 16px; }
-      .auth-card { padding: 23px 19px; border-radius: 20px; }
-    }
-    @media (max-height: 700px) {
-      body { place-items: start center; }
-      .auth-layout { align-content: start; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        scroll-behavior: auto !important;
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-      }
-    }
+
+    /* SLIDER & ANIMATED BACKGROUND SECTION */
     .connection-screen {
       position: fixed;
       inset: 0;
@@ -421,19 +414,19 @@
       display: grid;
       overflow: hidden;
       place-items: center;
-      color: rgba(176, 164, 255, .045);
-      font: 700 clamp(105px, 24vw, 330px)/1 "Space Grotesk", sans-serif;
+      color: rgba(176, 164, 255, .07);
+      font: 700 clamp(100px, 22vw, 300px)/1 "Space Grotesk", sans-serif;
       letter-spacing: -.09em;
       user-select: none;
       pointer-events: none;
     }
     .connection-watermark span {
       display: block;
-      animation: watermark-drift 9s ease-in-out infinite alternate;
+      animation: watermark-drift 6s ease-in-out infinite alternate;
     }
     @keyframes watermark-drift {
-      from { transform: translate3d(-2%, 2%, 0) scale(.96); }
-      to { transform: translate3d(2%, -2%, 0) scale(1.04); }
+      0% { transform: translate3d(-3%, 3%, 0) scale(.95); opacity: 0.4; }
+      100% { transform: translate3d(3%, -3%, 0) scale(1.05); opacity: 0.9; }
     }
     .connection-content {
       position: relative;
@@ -496,34 +489,38 @@
       transition: filter .2s ease, transform .2s ease;
     }
     .connection-retry:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .connection-retry:focus-visible {
-      outline: 2px solid #c8b6ff;
-      outline-offset: 4px;
-    }
-    .connection-screen.is-offline .connection-loader { display: none; }
-    @media (prefers-reduced-motion: reduce) {
-      .connection-loader, .connection-watermark span { animation: none; }
-    }
-    @media (max-width: 480px) {
-      .connection-brand { gap: 11px; font-size: 21px; }
-      .connection-brand img { width: 49px; height: 49px; }
-      .connection-message { max-width: 280px; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .auth-layout {
+        width: min(560px, 100%);
+        min-height: 100dvh;
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: max(20px, env(safe-area-inset-top)) 22px max(20px, env(safe-area-inset-bottom));
+      }
+      .story { display: none; }
+      .auth-card { padding: clamp(24px, 7vw, 36px); }
+      .mobile-brand { display: inline-flex; margin-bottom: 22px; }
+      .mobile-brand img { width: 34px; height: 34px; }
+      .mobile-brand span { font-size: 18px; }
     }
   </style>
 </head>
 <body>
+  <!-- Siz so'ragan slider va orqasida ILYOS keyframes yozuvi turuvchi qism -->
   <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
     <div class="connection-watermark" aria-hidden="true"><span>ILYOS</span></div>
     <div class="connection-content">
       <div class="connection-brand">
-        <img src="./favicon.svg" alt="">
-        <span>ILYOS AI</span>
+        <img src="favicon.svg" alt="">
+        <span>ILYOS.AI</span>
       </div>
       <span class="connection-loader" id="connectionLoader" aria-hidden="true"></span>
       <p class="connection-message" id="connectionMessage">Internet aloqasi tekshirilmoqda...</p>
       <button class="connection-retry" id="connectionRetry" type="button" hidden>Qayta urinib ko‘rish</button>
     </div>
   </div>
+
   <main class="auth-layout">
     <section class="story" aria-label="Ilyos AI">
       <a class="brand" href="./home.html">
@@ -603,10 +600,7 @@
         <div id="socialLogin">
           <div class="divider"><span>yoki</span></div>
           <div id="googleButton" aria-label="Google orqali kirish"></div>
-          <div class="google-fallback" id="googleFallback" hidden>
-            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.8 1.2-4.1 2-6.8 2-5.2 0-9.7-3.5-11.3-8.2H5.8v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.7 27.9a12 12 0 0 1 0-7.7v-5.3H5.8a20 20 0 0 0 0 18.3l6.9-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.9 5.3C14.3 15.5 18.8 12 24 12Z"/></svg>
-            Google orqali kirish
-          </div>
+          <p class="google-fallback" id="googleFallback" role="status" hidden>Google orqali kirish hozircha sozlanmagan. Serverda GOOGLE_CLIENT_ID qiymatini tekshiring.</p>
         </div>
         <p class="status" id="authStatus" role="status" aria-live="polite"></p>
         <p class="legal">Davom etish orqali hisobingizdan foydalanish shartlariga rozilik bildirasiz.</p>
@@ -620,7 +614,7 @@
     </span>
     <div class="card-heading">
       <h2 id="verifyTitle">Emailni tasdiqlang</h2>
-      <p class="verify-note">Tasdiqlash kodini emailingizga yubordik: <strong id="verifyEmail"></strong></p>
+      <p class="verify-note" id="verifyNote">Tasdiqlash kodi yuborilgach shu yerda ko‘rsatiladi.</p>
     </div>
     <form id="verifyForm" class="form-fields">
       <div class="field">
@@ -630,46 +624,239 @@
       <button class="primary-button" id="verifySubmit" type="submit">Kodni tasdiqlash</button>
     </form>
     <button class="resend-button" id="resendCode" type="button">Kodni qayta yuborish</button>
-    <button class="back-link" id="backToRegister" type="button">← Ro‘yxatdan o‘tishga qaytish</button>
+    <button class="back-link" id="backToAuth" type="button">← Ro‘yxatdan o‘tishga qaytish</button>
     <p class="status" id="verifyStatus" role="status" aria-live="polite"></p>
   </dialog>
 
+  <dialog class="verification-dialog code-display-dialog" id="codeDisplayDialog" aria-labelledby="codeDisplayTitle">
+    <span class="verify-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <div class="card-heading">
+      <h2 id="codeDisplayTitle">Tasdiqlash kodi</h2>
+      <p class="verify-note">Kodingiz tayyor. Uni tasdiqlash oynasiga kiriting.</p>
+    </div>
+    <output class="code-display" id="codeDisplayValue" aria-label="Tasdiqlash kodi"></output>
+    <p class="code-display-hint">Kod xavfsizlik uchun 10 daqiqadan keyin eskiradi.</p>
+    <button class="primary-button" id="codeDisplayContinue" type="button">Davom etish</button>
+  </dialog>
+
   <script>
-    const accountApi = './api/account';
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const canUseLocalAuth = isLocalHost || window.location.protocol === 'file:';
+    let apiBase = '';
+    const accountApi = () => `${apiBase}/api/account`;
+
+    async function resolveApiBase() {
+      const candidates = [window.location.origin];
+
+      for (const candidate of candidates) {
+        try {
+          const response = await fetch(`${candidate}/api/health`, { cache: 'no-store' });
+          const contentType = response.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) continue;
+          const health = await response.json();
+          if (typeof health.ready === 'boolean') return candidate;
+        } catch {
+          // Ignore; continue with the next candidate.
+        }
+      }
+
+      return '';
+    }
     const loginTab = document.getElementById('loginTab');
     const registerTab = document.getElementById('registerTab');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const verifyDialog = document.getElementById('verifyDialog');
+    const codeDisplayDialog = document.getElementById('codeDisplayDialog');
     const verifyStatus = document.getElementById('verifyStatus');
     const resendButton = document.getElementById('resendCode');
     const socialLogin = document.getElementById('socialLogin');
     const authStatus = document.getElementById('authStatus');
     let pendingRegistration = null;
+    let pendingLogin = null;
     let resendSeconds = 0;
     let resendTimer;
     let busy = false;
+    let localPendingAuth = null;
     resendButton.dataset.label = resendButton.textContent;
+    verifyDialog.addEventListener('cancel', event => event.preventDefault());
 
     const apiErrors = {
-      account_not_found: 'Bu email bilan hisob topilmadi.',
-      account_storage_not_configured: '.env faylida NETLIFY_SITE_ID va NETLIFY_AUTH_TOKEN sozlang.',
-      email_exists: 'Bu email allaqachon ro‘yxatdan o‘tgan. Kirishni sinab ko‘ring.',
-      email_service_not_configured: '.env faylida RESEND_API_KEY va RESEND_FROM_EMAIL sozlang.',
-      email_delivery_failed: 'Tasdiqlash kodi yuborilmadi. Birozdan so‘ng qayta urinib ko‘ring.',
-      google_not_configured: 'Google orqali kirish hozircha sozlanmagan.',
-      invalid_account: 'Ism, email yoki parol noto‘g‘ri. Parol kamida 8 ta belgidan iborat bo‘lsin.',
-      invalid_credentials: 'Email yoki parol noto‘g‘ri.',
-      invalid_google_credential: 'Google orqali tasdiqlash amalga oshmadi. Qayta urinib ko‘ring.',
-      invalid_verification_code: 'Kod noto‘g‘ri. Emailga yuborilgan 6 xonali kodni tekshiring.',
-      verification_expired: 'Tasdiqlash kodi eskirgan. Yangi kod so‘rang.',
-      verification_attempts_exceeded: 'Urinishlar limiti tugadi. Ro‘yxatdan o‘tishni qaytadan boshlang.',
-      verification_rate_limited: 'Yangi kod yuborishdan oldin bir daqiqa kuting.'
+      account_not_found: "Bu email bilan hisob topilmadi.",
+      account_storage_not_configured: ".env faylida GMAIL_USER va GMAIL_APP_PASSWORD sozlang.",
+      email_exists: "Bu email allaqachon ro’yxatdan o’tgan. Kirishni sinab ko’ring.",
+      email_service_not_configured: ".env faylida GMAIL_USER va GMAIL_APP_PASSWORD ni to’g’ri sozlang.",
+      email_delivery_failed: "Tasdiqlash kodi yuborilmadi. Gmail App Password ni tekshiring.",
+      google_not_configured: "Google orqali kirish hozircha sozlanmagan.",
+      invalid_account: "Ism, email yoki parol noto’g’ri. Parol kamida 8 ta belgidan iborat bo’lsin.",
+      invalid_credentials: "Email yoki parol noto’g’ri.",
+      invalid_google_credential: "Google orqali tasdiqlash amalga oshmadi. Qayta urinib ko’ring.",
+      invalid_verification_code: "Kod noto’g’ri. Ko’rsatilgan 6 xonali kodni tekshiring.",
+      verification_expired: "Tasdiqlash kodi eskirgan. Yangi kod so’rang.",
+      verification_attempts_exceeded: "Urinishlar limiti tugadi. Kirishni yoki ro’yxatdan o’tishni qaytadan boshlang.",
+      verification_rate_limited: "Yangi kod yuborishdan oldin bir daqiqa kuting."
     };
 
     function showStatus(message, success = false, target = authStatus) {
       target.textContent = message;
       target.classList.toggle('success', success);
+    }
+
+    function showLocalCodeIfNeeded(result, purpose) {
+      if (typeof result?.devCode === 'string') {
+        document.getElementById('codeDisplayTitle').textContent = purpose === 'login' ? 'Kirish kodi' : 'Tasdiqlash kodi';
+        document.getElementById('codeDisplayValue').textContent = result.devCode;
+        codeDisplayDialog.showModal();
+      }
+    }
+
+    document.getElementById('codeDisplayContinue').addEventListener('click', () => codeDisplayDialog.close());
+
+    function setVerificationNotice(title, email, localCode) {
+      document.getElementById('verifyTitle').textContent = title;
+      const note = document.getElementById('verifyNote');
+      note.replaceChildren(document.createTextNode(
+        localCode ? 'Kod alertda ko‘rsatildi: ' : 'Kod emailingizga yuborildi: '
+      ));
+      const emailLabel = document.createElement('strong');
+      emailLabel.id = 'verifyEmail';
+      emailLabel.textContent = email;
+      note.append(emailLabel);
+    }
+
+    function localAuthCode() {
+      const bytes = new Uint32Array(1);
+      window.crypto.getRandomValues(bytes);
+      return String(100000 + bytes[0] % 900000);
+    }
+
+    function localBytesToHex(bytes) {
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function localPasswordHash(password, salt) {
+      const key = await window.crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(password),
+        'PBKDF2',
+        false,
+        ['deriveBits']
+      );
+      const hash = await window.crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt: Uint8Array.from(salt.match(/.{2}/g), byte => parseInt(byte, 16)), iterations: 120000, hash: 'SHA-256' },
+        key,
+        256
+      );
+      return localBytesToHex(new Uint8Array(hash));
+    }
+
+    function readLocalAccounts() {
+      try {
+        const accounts = JSON.parse(localStorage.getItem('ilyosLocalAccounts') || '{}');
+        if (!accounts || typeof accounts !== 'object' || Array.isArray(accounts)) {
+          throw new Error('Local hisoblar formati noto‘g‘ri.');
+        }
+        return accounts;
+      } catch (error) {
+        console.error('Local accounts could not be read:', error);
+        throw new Error('Brauzer hisoblarini o‘qib bo‘lmadi. Brauzer xotirasini tekshiring.');
+      }
+    }
+
+    function createLocalVerification(data, purpose) {
+      const code = localAuthCode();
+      localPendingAuth = {
+        purpose,
+        email: data.email.trim().toLowerCase(),
+        name: data.name,
+        passwordHash: data.passwordHash,
+        passwordSalt: data.passwordSalt,
+        code,
+        attempts: 0,
+        expiresAt: Date.now() + 10 * 60 * 1000
+      };
+      return { pending: true, devCode: code };
+    }
+
+    async function requestLocalAccount(action, data) {
+      const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : '';
+      const accounts = readLocalAccounts();
+
+      if (action === 'register') {
+        const name = typeof data.name === 'string' ? data.name.trim() : '';
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+            !name || name.length > 100 || typeof data.password !== 'string' ||
+            data.password.length < 8 || new TextEncoder().encode(data.password).length > 1024) {
+          throw new Error(apiErrors.invalid_account);
+        }
+        if (accounts[email]) throw new Error(apiErrors.email_exists);
+        const passwordSalt = localBytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
+        const passwordHash = await localPasswordHash(data.password, passwordSalt);
+        return createLocalVerification({ email, name, passwordSalt, passwordHash }, 'register');
+      }
+
+      if (action === 'login') {
+        const account = accounts[email];
+        if (!account || typeof data.password !== 'string' ||
+            await localPasswordHash(data.password, account.passwordSalt) !== account.passwordHash) {
+          throw new Error(apiErrors.invalid_credentials);
+        }
+        return createLocalVerification({ email, name: account.name }, 'login');
+      }
+
+      if (action === 'resend-login' || action === 'resend-register') {
+        if (!localPendingAuth || localPendingAuth.email !== email) {
+          throw new Error(apiErrors.verification_expired);
+        }
+        return createLocalVerification(localPendingAuth, localPendingAuth.purpose);
+      }
+
+      if (action === 'verify' || action === 'verify-login') {
+        const purpose = action === 'verify' ? 'register' : 'login';
+        const pending = localPendingAuth;
+        if (!pending || pending.email !== email || pending.purpose !== purpose ||
+            pending.expiresAt <= Date.now()) {
+          localPendingAuth = null;
+          throw new Error(apiErrors.verification_expired);
+        }
+        if (data.code !== pending.code) {
+          pending.attempts += 1;
+          if (pending.attempts >= 5) {
+            localPendingAuth = null;
+            throw new Error(apiErrors.verification_attempts_exceeded);
+          }
+          throw new Error(apiErrors.invalid_verification_code);
+        }
+        localPendingAuth = null;
+        const account = accounts[email];
+        if (purpose === 'register') {
+          if (account) throw new Error(apiErrors.email_exists);
+          accounts[email] = {
+            email,
+            name: pending.name,
+            passwordSalt: pending.passwordSalt,
+            passwordHash: pending.passwordHash
+          };
+          try {
+            localStorage.setItem('ilyosLocalAccounts', JSON.stringify(accounts));
+          } catch (error) {
+            console.error('Local account could not be saved:', error);
+            throw new Error('Hisobni brauzerda saqlab bo‘lmadi.');
+          }
+        } else if (!account) {
+          throw new Error(apiErrors.account_not_found);
+        }
+        return { user: { email, name: purpose === 'register' ? pending.name : account.name } };
+      }
+
+      throw new Error('Bu amal lokal rejimda qo‘llab-quvvatlanmaydi.');
+    }
+
+    async function useLocalAccountFallback(action, data) {
+      if (!canUseLocalAuth) return null;
+      return requestLocalAccount(action, data);
     }
 
     function setBusy(value, button) {
@@ -705,9 +892,18 @@
     }
 
     async function requestAccount(action, data = {}) {
+      if (canUseLocalAuth &&
+          ['login', 'register', 'resend-login', 'verify', 'verify-login'].includes(action)) {
+        return requestLocalAccount(action, data);
+      }
+
+      if (!apiBase) {
+        apiBase = await resolveApiBase();
+      }
+
       let response;
       try {
-        response = await fetch(accountApi, {
+        response = await fetch(accountApi(), {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -715,17 +911,19 @@
           signal: AbortSignal.timeout(15_000)
         });
       } catch (error) {
-        console.error('Account request failed:', error);
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-          throw new Error('So‘rov 15 soniyada javob bermadi. Internetni tekshirib, qayta urinib ko‘ring.');
+          throw new Error("So’rov 15 soniyada javob bermadi. Internetni tekshirib, qayta urinib ko’ring.");
         }
-        throw new Error('Internet bilan aloqa yo‘q. Ulanishni tekshirib, qayta urinib ko‘ring.');
+        const localResult = await useLocalAccountFallback(action, data);
+        if (localResult) return localResult;
+        throw new Error("Hisob API ishlamayapti. Serverni ishga tushiring: python main.py");
       }
 
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
-        console.error('Account server returned a non-JSON response:', response.status, contentType);
-        throw new Error('Hisob API topilmadi. Mahalliyda npm start orqali oching; Netlify’da Functions sozlamalarini tekshiring.');
+        const localResult = await useLocalAccountFallback(action, data);
+        if (localResult) return localResult;
+        throw new Error('Hisob API ishlamayapti. Serverni ishga tushiring: python main.py');
       }
 
       let result;
@@ -735,7 +933,13 @@
         console.error('Account server returned invalid JSON:', error);
         throw new Error('Serverdan javob olishda xatolik yuz berdi.');
       }
-      if (!response.ok) throw new Error(apiErrors[result.error] || 'Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.');
+      if (!response.ok) {
+        if (['email_service_not_configured', 'email_delivery_failed', 'account_storage_not_configured'].includes(result.error)) {
+          const localResult = await useLocalAccountFallback(action, data);
+          if (localResult) return localResult;
+        }
+        throw new Error(apiErrors[result.error] || "Amalni bajarib bo’lmadi. Qayta urinib ko’ring.");
+      }
       return result;
     }
 
@@ -746,7 +950,7 @@
       socialLogin.hidden = false;
       loginTab.setAttribute('aria-selected', String(mode === 'login'));
       registerTab.setAttribute('aria-selected', String(mode === 'register'));
-      document.getElementById('formTitle').textContent = mode === 'login' ? 'Hisobingizga kiring' : 'Yangi hisob yarating';
+      document.getElementById('formTitle').textContent = mode === 'login' ? "Hisobingizga kiring" : "Yangi hisob yarating";
       document.getElementById('formSubtitle').textContent = mode === 'login'
         ? 'Ilyos AI’dan foydalanishni davom ettiring.'
         : 'Boshlash uchun ma’lumotlaringizni kiriting.';
@@ -762,7 +966,7 @@
       } catch (error) {
         console.error('Signed-in account could not be cached:', error);
       }
-      showStatus('Muvaffaqiyatli kirdingiz. Yo‘naltirilmoqda…', true);
+      showStatus("Muvaffaqiyatli kirdingiz. Yo’naltirilmoqda…", true);
       window.location.assign('./home.html');
     }
 
@@ -788,11 +992,21 @@
     loginForm.addEventListener('submit', async event => {
       event.preventDefault();
       const button = document.getElementById('loginSubmit');
+      const email = document.getElementById('loginEmail').value.trim();
       const result = await submitWithButton('login', {
-        email: document.getElementById('loginEmail').value.trim(),
+        email,
         password: document.getElementById('loginPassword').value
       }, button);
-      if (result) await completeSignIn(result);
+      if (!result) return;
+      pendingLogin = { email };
+      document.getElementById('loginPassword').value = '';
+      setVerificationNotice('Kirishni tasdiqlang', email, result.devCode);
+      document.getElementById('backToAuth').textContent = '← Kirishga qaytish';
+      document.getElementById('verifyCode').value = '';
+      showStatus(result.devCode ? 'Alertda chiqqan kirish kodini kiriting.' : 'Kirish kodini kiriting.', true, verifyStatus);
+      verifyDialog.showModal();
+      showLocalCodeIfNeeded(result, 'login');
+      startResendCountdown();
     });
 
     registerForm.addEventListener('submit', async event => {
@@ -808,169 +1022,116 @@
         pendingRegistration = null;
         return;
       }
-      document.getElementById('verifyEmail').textContent = pendingRegistration.email;
-      document.getElementById('verifyForm').reset();
-      showStatus('');
-      showStatus('Tasdiqlash kodi emailingizga yuborildi.', true, verifyStatus);
-      startResendCountdown();
+      pendingLogin = null;
+      setVerificationNotice('Kodni tasdiqlang', pendingRegistration.email, result.devCode);
+      document.getElementById('backToAuth').textContent = '← Ro‘yxatdan o‘tishga qaytish';
+      document.getElementById('verifyCode').value = '';
+      showStatus(result.devCode ? 'Alertda chiqqan tasdiqlash kodini kiriting.' : 'Tasdiqlash kodini kiriting.', true, verifyStatus);
       verifyDialog.showModal();
-      document.getElementById('verifyCode').focus();
+      showLocalCodeIfNeeded(result, 'register');
+      startResendCountdown();
     });
 
     document.getElementById('verifyForm').addEventListener('submit', async event => {
       event.preventDefault();
-      if (!pendingRegistration) {
-        showTab('register');
-        return;
-      }
+      if (!pendingRegistration && !pendingLogin) return;
       const button = document.getElementById('verifySubmit');
-      const result = await submitWithButton('verify', {
-        email: pendingRegistration.email,
-        code: document.getElementById('verifyCode').value.trim()
-      }, button, undefined, verifyStatus);
+      const code = document.getElementById('verifyCode').value.trim();
+      const isLogin = Boolean(pendingLogin);
+      const result = await submitWithButton(
+        isLogin ? 'verify-login' : 'verify',
+        isLogin ? { ...pendingLogin, code } : { ...pendingRegistration, code },
+        button,
+        isLogin ? 'Kirish tasdiqlandi. Hisob ochilmoqda…' : 'Email tasdiqlandi. Hisob yaratilmoqda…',
+        verifyStatus
+      );
+
       if (result) {
         verifyDialog.close();
         pendingRegistration = null;
+        pendingLogin = null;
         await completeSignIn(result);
-      } else if (verifyStatus.textContent.includes('Urinishlar limiti')) {
-        pendingRegistration = null;
       }
     });
 
-    document.getElementById('resendCode').addEventListener('click', async () => {
-      if (!pendingRegistration || resendSeconds > 0) return;
+    resendButton.addEventListener('click', async () => {
+      if ((!pendingRegistration && !pendingLogin) || busy || resendSeconds > 0) return;
+      const isLogin = Boolean(pendingLogin);
       const result = await submitWithButton(
-        'register',
-        pendingRegistration,
+        isLogin ? 'resend-login' : 'register',
+        isLogin ? pendingLogin : pendingRegistration,
         resendButton,
-        'Yangi tasdiqlash kodi emailingizga yuborildi.',
+        'Yangi tasdiqlash kodi yuborildi.',
         verifyStatus
       );
-      if (result) startResendCountdown();
-    });
-
-    document.getElementById('backToRegister').addEventListener('click', () => {
-      if (busy) return;
-      pendingRegistration = null;
-      verifyDialog.close();
-      document.getElementById('verifyForm').reset();
-      showTab('register');
-    });
-    verifyDialog.addEventListener('cancel', event => event.preventDefault());
-
-    async function handleGoogleCredential(response) {
-      const button = document.getElementById('googleButton');
-      button.dataset.label = '';
-      setBusy(true);
-      showStatus('');
-      try {
-        const result = await requestAccount('google', { idToken: response.credential });
-        await completeSignIn(result);
-      } catch (error) {
-        showStatus(error.message);
-      } finally {
-        setBusy(false);
+      if (result) {
+        showLocalCodeIfNeeded(result, isLogin ? 'login' : 'register');
+        if (result.devCode) showStatus('Yangi kod alertda ko‘rsatildi.', true, verifyStatus);
+        startResendCountdown();
       }
-    }
+    });
 
-    function initializeGoogleSignIn() {
-      if (!window.google?.accounts?.id) {
-        document.getElementById('googleFallback').hidden = false;
+    document.getElementById('backToAuth').addEventListener('click', () => {
+      if (busy) return;
+      verifyDialog.close();
+      const isLogin = Boolean(pendingLogin);
+      pendingLogin = null;
+      pendingRegistration = null;
+      showTab(isLogin ? 'login' : 'register');
+    });
+
+    window.initializeGoogleSignIn = async function() {
+      const googleButton = document.getElementById('googleButton');
+      const googleFallback = document.getElementById('googleFallback');
+      const socialLogin = document.getElementById('socialLogin');
+
+      apiBase = await resolveApiBase();
+
+      if (window.location.protocol === 'file:' || !apiBase) {
+        googleButton.hidden = true;
+        googleFallback.hidden = true;
+        socialLogin.hidden = true;
         return;
       }
-      window.google.accounts.id.initialize({
-        client_id: '499001615599-oiaag765cv1uc43no0t34p90krs86kt3.apps.googleusercontent.com',
-        callback: handleGoogleCredential
-      });
-      window.google.accounts.id.renderButton(document.getElementById('googleButton'), {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        shape: 'rectangular',
-        text: 'continue_with',
-        width: 240
-      });
-    }
-    window.initializeGoogleSignIn = initializeGoogleSignIn;
-    document.getElementById('googleFallback').addEventListener('click', () => {
-      showStatus('Google xizmati yuklanmadi. Sahifani yangilab qayta urinib ko‘ring.');
-    });
 
-    document.querySelectorAll('.primary-button').forEach(button => {
-      button.dataset.label = button.textContent;
-    });
-    const connectionScreen = document.getElementById('connectionScreen');
-    const connectionMessage = document.getElementById('connectionMessage');
-    const connectionRetry = document.getElementById('connectionRetry');
-    let connectionCheckInProgress = false;
-    let connectionHideTimer;
-
-    function hideConnectionScreen() {
-      connectionScreen.classList.add('is-hidden');
-      connectionScreen.setAttribute('aria-hidden', 'true');
-      window.clearTimeout(connectionHideTimer);
-      connectionHideTimer = window.setTimeout(() => {
-        connectionScreen.hidden = true;
-      }, 450);
-    }
-
-    async function checkConnection() {
-      if (connectionCheckInProgress) return;
-      connectionCheckInProgress = true;
-      connectionScreen.hidden = false;
-      connectionScreen.classList.remove('is-hidden', 'is-offline');
-      connectionScreen.setAttribute('aria-hidden', 'false');
-      connectionMessage.textContent = 'Internet aloqasi tekshirilmoqda...';
-      connectionRetry.hidden = true;
-
-      const startedAt = performance.now();
-      const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 4000);
       try {
-        const response = await fetch(accountApi, {
-          credentials: 'include',
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        window.clearTimeout(timeout);
-        if (!response.headers.get('content-type')?.includes('application/json')) {
-          connectionScreen.classList.add('is-offline');
-          connectionMessage.textContent = 'Hisob API topilmadi. Mahalliyda npm start orqali oching; Netlify’da Functions sozlamalarini tekshiring.';
-          connectionRetry.hidden = false;
-          return;
+        const response = await fetch(`${apiBase}/api/config`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Google config request failed: ${response.status}`);
+        const config = await response.json();
+        const clientId = config.googleClientId;
+        if (!clientId || !window.google?.accounts) {
+          throw new Error('Google Sign-In is not configured or its library did not load.');
         }
 
-        if (response.ok) {
-          try {
-            const result = await response.json();
-            if (result.user) {
-              hideConnectionScreen();
-              await completeSignIn(result);
-              return;
-            }
-          } catch (error) {
-            console.error('Account session response could not be read:', error);
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async response => {
+            const button = document.getElementById('googleButton');
+            const result = await submitWithButton('google', { idToken: response.credential }, button, 'Google orqali kirildi.');
+            if (result) await completeSignIn(result);
           }
-        }
-        hideConnectionScreen();
-      } catch (error) {
-        window.clearTimeout(timeout);
-        console.error('Internet connection check failed:', error);
-        const remainingTime = Math.max(0, 4000 - (performance.now() - startedAt));
-        if (remainingTime > 0) {
-          await new Promise(resolve => window.setTimeout(resolve, remainingTime));
-        }
-        connectionScreen.classList.add('is-offline');
-        connectionMessage.textContent = 'Internet ishlamadi. Internetni tekshirib, qayta urinib ko‘ring.';
-        connectionRetry.hidden = false;
-        connectionRetry.focus();
-      } finally {
-        connectionCheckInProgress = false;
+        });
+        google.accounts.id.renderButton(
+          googleButton,
+          { theme: 'outline', size: 'large', width: 398, shape: 'pill' }
+        );
+        googleFallback.hidden = true;
+      } catch {
+        googleButton.hidden = true;
+        googleFallback.hidden = true;
+        socialLogin.hidden = true;
       }
-    }
+    };
 
-    connectionRetry.addEventListener('click', checkConnection);
-    checkConnection();
+    // Sayt ochilganda yuklanish ekranini yo'q qilish (Live Server uchun moslashtirilgan)
+    window.addEventListener('load', async () => {
+      const screen = document.getElementById('connectionScreen');
+      apiBase = await resolveApiBase();
+      window.initializeGoogleSignIn();
+      setTimeout(() => {
+        screen.classList.add('is-hidden');
+      }, 800);
+    });
   </script>
 </body>
 </html>

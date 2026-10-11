@@ -21,10 +21,17 @@ random value of at least 32 bytes. Do not commit real keys or secrets.
 ## Local development
 
 Copy `.env.example` to `.env`, then provide a local `GOOGLE_CLIENT_ID`,
-`NETLIFY_SITE_ID`, and `NETLIFY_AUTH_TOKEN`. Set `AUTH_SESSION_SECRET` only if
-you want to override the generated key. Keep `.env` private. Start the
-API/static server with `npm start`; when using VS Code Live Server, its API
-requests connect to the same machine's server on port 5508.
+`GEMINI_API_KEY`, `GMAIL_USER`, and `GMAIL_APP_PASSWORD`. `NETLIFY_SITE_ID`
+and `NETLIFY_AUTH_TOKEN` are only needed for local access to Netlify Blobs.
+Set `AUTH_SESSION_SECRET` only if you want to override the generated key.
+Keep `.env` private. Start the API/static server with `python main.py`
+(Node.js 20 or newer is also required); `npm start` starts the same server.
+
+When using VS Code Live Server, keep the API server running too. It uses port
+5509 by default and automatically selects the next port if that one is busy.
+The AI page checks the local ports and connects to the running API server.
+The Google OAuth client must allow the local site's origin in its authorized
+JavaScript origins.
 
 Chat history is merged with the account's saved history at sign-in and synced
 after changes. The existing 30-chat limit remains in effect. A one-time

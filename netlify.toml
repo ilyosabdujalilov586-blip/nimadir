@@ -9,6 +9,11 @@
   node_bundler = "esbuild"
 
 [[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/config"
+  status = 200
+
+[[redirects]]
   from = "/api/account"
   to = "/.netlify/functions/account"
   status = 200

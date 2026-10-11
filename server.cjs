@@ -7,7 +7,7 @@ const { handler: chatsHandler } = require('./netlify/functions/chats.js');
 
 const root = __dirname;
 require('dotenv').config({ path: path.join(root, '.env') });
-const port = Number(process.env.PORT || 5509);
+const preferredPort = Number(process.env.PORT || 5509);
 const model = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
 const ai = createAi();
 const modelIds = new Set(models.map(({ id }) => id));
@@ -71,13 +71,6 @@ async function handleAccountApi(request, response, handler) {
     }
   }
 
-  if (handler === accountHandler &&
-      ['register', 'verify', 'login', 'migrate', 'google'].includes(parsedBody.action) &&
-      (!process.env.NETLIFY_SITE_ID || !process.env.NETLIFY_AUTH_TOKEN)) {
-    sendJson(response, 503, { error: 'account_storage_not_configured' });
-    return;
-  }
-
   const result = await handler({
     httpMethod: request.method,
     headers: {
@@ -139,85 +132,108 @@ async function handleChat(request, response) {
   }
 }
 
-createServer(async (request, response) => {
-  const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
-  if (pathname.startsWith('/api/')) {
-    setApiCorsHeaders(request, response);
-    if (request.method === 'OPTIONS') {
-      response.writeHead(204);
+function startServer(port) {
+  const server = createServer(async (request, response) => {
+    const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+    if (pathname.startsWith('/api/')) {
+      setApiCorsHeaders(request, response);
+      if (request.method === 'OPTIONS') {
+        response.writeHead(204);
+        response.end();
+        return;
+      }
+    }
+
+    if (pathname === '/api/health' && request.method === 'GET') {
+      sendJson(response, ai ? 200 : 503, {
+        ready: Boolean(ai),
+        error: ai ? undefined : 'Serverda GEMINI_API_KEY sozlanmagan.'
+      });
+      return;
+    }
+    if (pathname === '/api/config' && request.method === 'GET') {
+      sendJson(response, 200, {
+        googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+      });
+      return;
+    }
+    if (pathname === '/api/models' && request.method === 'GET') {
+      sendJson(response, ai ? 200 : 503, {
+        models,
+        defaultModel: modelIds.has(model) ? model : models[0].id,
+        error: ai ? undefined : 'Serverda GEMINI_API_KEY sozlanmagan.'
+      });
+      return;
+    }
+    if (pathname === '/api/chat' && request.method === 'POST') {
+      await handleChat(request, response);
+      return;
+    }
+    if (pathname === '/api/account' && ['GET', 'POST'].includes(request.method)) {
+      await handleAccountApi(request, response, accountHandler);
+      return;
+    }
+    if (pathname === '/api/chats' && ['GET', 'PUT'].includes(request.method)) {
+      await handleAccountApi(request, response, chatsHandler);
+      return;
+    }
+    if (pathname.startsWith('/api/')) {
+      sendJson(response, 404, { error: 'API endpoint topilmadi.' });
+      return;
+    }
+    if (!['GET', 'HEAD'].includes(request.method)) {
+      response.writeHead(405);
       response.end();
       return;
     }
-  }
 
-  if (pathname === '/api/health' && request.method === 'GET') {
-    sendJson(response, ai ? 200 : 503, {
-      ready: Boolean(ai),
-      error: ai ? undefined : 'Serverda GEMINI_API_KEY sozlanmagan.'
-    });
-    return;
-  }
-  if (pathname === '/api/models' && request.method === 'GET') {
-    sendJson(response, ai ? 200 : 503, {
-      models,
-      defaultModel: modelIds.has(model) ? model : models[0].id,
-      error: ai ? undefined : 'Serverda GEMINI_API_KEY sozlanmagan.'
-    });
-    return;
-  }
-  if (pathname === '/api/chat' && request.method === 'POST') {
-    await handleChat(request, response);
-    return;
-  }
-  if (pathname === '/api/account' && ['GET', 'POST'].includes(request.method)) {
-    await handleAccountApi(request, response, accountHandler);
-    return;
-  }
-  if (pathname === '/api/chats' && ['GET', 'PUT'].includes(request.method)) {
-    await handleAccountApi(request, response, chatsHandler);
-    return;
-  }
-  if (pathname.startsWith('/api/')) {
-    sendJson(response, 404, { error: 'API endpoint topilmadi.' });
-    return;
-  }
-  if (!['GET', 'HEAD'].includes(request.method)) {
-    response.writeHead(405);
-    response.end();
-    return;
-  }
-
-  if (pathname === '/') {
-    response.writeHead(302, { Location: '/index.html' });
-    response.end();
-    return;
-  }
-
-  const requestedPath = pathname;
-  if (!publicFiles.has(requestedPath)) {
-    response.writeHead(404);
-    response.end();
-    return;
-  }
-  const filePath = path.join(root, requestedPath.slice(1));
-
-  try {
-    const content = await readFile(filePath);
-    response.writeHead(200, {
-      'Content-Type': mimeTypes[path.extname(filePath)] || 'application/octet-stream'
-    });
-    response.end(request.method === 'HEAD' ? undefined : content);
-  } catch (error) {
-    if (error.code === 'ENOENT' || error.code === 'EISDIR') {
-      response.writeHead(404);
-      response.end('Not found');
+    if (pathname === '/') {
+      response.writeHead(302, { Location: '/index.html' });
+      response.end();
       return;
     }
-    console.error('Static file read failed:', error);
-    response.writeHead(500);
-    response.end('Internal server error');
-  }
-}).listen(port, '127.0.0.1', () => {
-  console.log(`Ilyos server: http://127.0.0.1:${port}/index.html`);
-  if (!ai) console.warn('GEMINI_API_KEY sozlanmagan; .env fayliga yangi kalit kiriting.');
-});
+
+    const requestedPath = pathname;
+    if (!publicFiles.has(requestedPath)) {
+      response.writeHead(404);
+      response.end();
+      return;
+    }
+    const filePath = path.join(root, requestedPath.slice(1));
+
+    try {
+      const content = await readFile(filePath);
+      response.writeHead(200, {
+        'Content-Type': mimeTypes[path.extname(filePath)] || 'application/octet-stream'
+      });
+      response.end(request.method === 'HEAD' ? undefined : content);
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'EISDIR') {
+        response.writeHead(404);
+        response.end('Not found');
+        return;
+      }
+      console.error('Static file read failed:', error);
+      response.writeHead(500);
+      response.end('Internal server error');
+    }
+  });
+
+  server.on('error', error => {
+    if (error.code === 'EADDRINUSE') {
+      const fallbackPort = port + 1;
+      console.warn(`Port ${port} band; ${fallbackPort} portiga o‘tilmoqda...`);
+      startServer(fallbackPort);
+      return;
+    }
+    console.error('Server failed to start:', error);
+    process.exitCode = 1;
+  });
+
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`Ilyos server: http://127.0.0.1:${port}/index.html`);
+    if (!ai) console.warn('GEMINI_API_KEY sozlanmagan; .env fayliga yangi kalit kiriting.');
+  });
+}
+
+startServer(preferredPort);

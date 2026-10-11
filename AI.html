@@ -744,7 +744,8 @@
   const historyStoragePrefix = 'ilyos_chat_history:';
   let historyStorageKey = `${historyStoragePrefix}guest`;
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  const apiBase = isLocalHost ? `http://${window.location.hostname}:5508` : '';
+  let apiBase = '';
+  let apiBasePromise = null;
   let responding = false;
   let ready = false;
   let chats = [];
@@ -758,6 +759,35 @@
   let remoteSaveQueue = Promise.resolve();
   let syncWarningShown = false;
 
+  async function resolveApiBase() {
+    if (!apiBasePromise) {
+      const host = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+      const candidates = isLocalHost
+        ? [...new Set([
+            window.location.origin,
+            ...[5509, 5510, 5511, 3000].map(port => `${window.location.protocol}//${host}:${port}`)
+          ])]
+        : [window.location.origin];
+
+      apiBasePromise = (async () => {
+        for (const candidate of candidates) {
+          try {
+            const response = await fetch(`${candidate}/api/health`, { cache: 'no-store' });
+            if (!response.headers.get('content-type')?.includes('application/json')) continue;
+            const health = await response.json();
+            if (typeof health.ready === 'boolean') return candidate;
+          } catch {
+            continue;
+          }
+        }
+        return '';
+      })();
+    }
+
+    apiBase = await apiBasePromise;
+    return apiBase;
+  }
+
   function showAccount(user) {
     accountName.textContent = user.name;
     accountInitials.textContent = user.name.charAt(0).toUpperCase();
@@ -766,6 +796,9 @@
   }
 
   async function initializeAccount() {
+    await resolveApiBase();
+    if (!apiBase) return;
+
     let cachedUser = null;
     try {
       cachedUser = JSON.parse(localStorage.getItem('ilyosActiveUser') || 'null');
@@ -1084,6 +1117,8 @@
   async function initGemini() {
     setStatus(ilyosT('chat.statusConnecting'), false);
     try {
+      await resolveApiBase();
+      if (!apiBase) throw new Error(ilyosT('chat.serverNotReady'));
       const health = await fetch(`${apiBase}/api/health`).then(readJson);
       if (!health.ready) throw new Error(health.error || ilyosT('chat.serverNotReady'));
       setStatus(ilyosT('chat.statusOnline'), true);

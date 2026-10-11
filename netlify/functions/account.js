@@ -2,15 +2,17 @@ const { jsonResponse } = require('./_shared.cjs');
 const {
   authenticateWithGoogle,
   getAccount,
-  login,
   migrateLegacyAccount,
   normalizeEmail,
   parseBody,
+  resendLoginVerification,
   readSession,
   sessionCookie,
   signSession,
   startAccountRegistration,
+  startLoginVerification,
   verifyAccountRegistration,
+  verifyLoginVerification,
   toPublicUser
 } = require('./_account-store.cjs');
 
@@ -79,11 +81,19 @@ exports.handler = async event => {
     if (body.action === 'register') {
       result = await startAccountRegistration(body);
       if (result.error) return responseForError(result.error);
-      return jsonResponse(200, { pending: true }, { 'Cache-Control': 'no-store' });
+      return jsonResponse(200, { pending: true, devCode: result.devCode }, { 'Cache-Control': 'no-store' });
     } else if (body.action === 'verify') {
       result = await verifyAccountRegistration(body);
     } else if (body.action === 'login') {
-      result = await login(body);
+      result = await startLoginVerification(body);
+      if (result.error) return responseForError(result.error);
+      return jsonResponse(200, { pending: true, devCode: result.devCode }, { 'Cache-Control': 'no-store' });
+    } else if (body.action === 'verify-login') {
+      result = await verifyLoginVerification(body);
+    } else if (body.action === 'resend-login') {
+      result = await resendLoginVerification(body);
+      if (result.error) return responseForError(result.error);
+      return jsonResponse(200, { pending: true, devCode: result.devCode }, { 'Cache-Control': 'no-store' });
     } else if (body.action === 'migrate') {
       result = await migrateLegacyAccount(body);
     } else if (body.action === 'google') {
