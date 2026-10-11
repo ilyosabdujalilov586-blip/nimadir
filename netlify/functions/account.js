@@ -106,7 +106,9 @@ exports.handler = async event => {
     if (!normalizeEmail(result.user?.email)) return jsonResponse(500, { error: 'account_request_failed' });
     return await accountResponse(event, result.user);
   } catch (error) {
-    const code = error.code === 'auth_not_configured' ? error.code : 'account_request_failed';
+    const code = ['auth_not_configured', 'account_storage_not_configured'].includes(error.code)
+      ? error.code
+      : 'account_request_failed';
     console.error('Account request failed:', code);
     return responseForError(code);
   }

@@ -74,14 +74,23 @@ function hasNetlifyConfig() {
 }
 
 function getStoreForSite(name) {
-  if (!hasNetlifyConfig()) {
-    return createLocalStore(name);
+  if (hasNetlifyConfig()) {
+    return getStore(name, {
+      consistency: 'strong',
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_AUTH_TOKEN
+    });
   }
 
-  const options = { consistency: 'strong' };
-  options.siteID = process.env.NETLIFY_SITE_ID;
-  options.token = process.env.NETLIFY_AUTH_TOKEN;
-  return getStore(name, options);
+  if (process.env.NETLIFY) return getStore(name, { consistency: 'strong' });
+
+  if (process.env.VERCEL) {
+    const error = new Error('Set NETLIFY_SITE_ID and NETLIFY_AUTH_TOKEN to enable persistent account storage on Vercel.');
+    error.code = 'account_storage_not_configured';
+    throw error;
+  }
+
+  return createLocalStore(name);
 }
 
 function getAccounts() {

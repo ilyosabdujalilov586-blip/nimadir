@@ -8,6 +8,6 @@ exports.handler = async event => {
   const ready = Boolean(createAi());
   return jsonResponse(ready ? 200 : 503, {
     ready,
-    error: ready ? undefined : 'Netlify sozlamalarida GEMINI_API_KEY o‘rnatilmagan.'
+    error: ready ? undefined : 'Server sozlamalarida GEMINI_API_KEY o‘rnatilmagan.'
   });
 };

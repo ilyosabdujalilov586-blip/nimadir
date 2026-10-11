@@ -30,7 +30,7 @@ function localizedError(language, key) {
   const messages = {
     uz: {
       method: 'Faqat POST so‘rovi qo‘llab-quvvatlanadi.',
-      apiKey: 'Netlify sozlamalarida GEMINI_API_KEY o‘rnatilmagan.',
+      apiKey: 'Server sozlamalarida GEMINI_API_KEY o‘rnatilmagan.',
       request: 'So‘rov formati noto‘g‘ri yoki hajmi katta.',
       model: 'Tanlangan Gemini modeli qo‘llab-quvvatlanmaydi.',
       messages: 'Xabarlar noto‘g‘ri formatda.',
@@ -40,7 +40,7 @@ function localizedError(language, key) {
     },
     en: {
       method: 'Only POST requests are supported.',
-      apiKey: 'GEMINI_API_KEY is not configured in Netlify.',
+      apiKey: 'GEMINI_API_KEY is not configured in the server environment.',
       request: 'The request is invalid or too large.',
       model: 'The selected Gemini model is not supported.',
       messages: 'The message format is invalid.',
@@ -50,7 +50,7 @@ function localizedError(language, key) {
     },
     ru: {
       method: 'Поддерживаются только POST-запросы.',
-      apiKey: 'В настройках Netlify не задан GEMINI_API_KEY.',
+      apiKey: 'В настройках сервера не задан GEMINI_API_KEY.',
       request: 'Запрос имеет неверный формат или слишком большой размер.',
       model: 'Выбранная модель Gemini не поддерживается.',
       messages: 'Неверный формат сообщений.',
