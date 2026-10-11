@@ -722,6 +722,12 @@
         throw new Error('Internet bilan aloqa yo‘q. Ulanishni tekshirib, qayta urinib ko‘ring.');
       }
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        console.error('Account server returned a non-JSON response:', response.status, contentType);
+        throw new Error('Hisob API topilmadi. Mahalliyda npm start orqali oching; Netlify’da Functions sozlamalarini tekshiring.');
+      }
+
       let result;
       try {
         result = await response.json();
@@ -927,6 +933,12 @@
           signal: controller.signal
         });
         window.clearTimeout(timeout);
+        if (!response.headers.get('content-type')?.includes('application/json')) {
+          connectionScreen.classList.add('is-offline');
+          connectionMessage.textContent = 'Hisob API topilmadi. Mahalliyda npm start orqali oching; Netlify’da Functions sozlamalarini tekshiring.';
+          connectionRetry.hidden = false;
+          return;
+        }
 
         if (response.ok) {
           try {

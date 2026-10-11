@@ -7,7 +7,7 @@ const { handler: chatsHandler } = require('./netlify/functions/chats.js');
 
 const root = __dirname;
 require('dotenv').config({ path: path.join(root, '.env') });
-const port = 5508;
+const port = Number(process.env.PORT || 5509);
 const model = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
 const ai = createAi();
 const modelIds = new Set(models.map(({ id }) => id));
@@ -71,7 +71,8 @@ async function handleAccountApi(request, response, handler) {
     }
   }
 
-  if (handler === accountHandler && parsedBody.action === 'register' &&
+  if (handler === accountHandler &&
+      ['register', 'verify', 'login', 'migrate', 'google'].includes(parsedBody.action) &&
       (!process.env.NETLIFY_SITE_ID || !process.env.NETLIFY_AUTH_TOKEN)) {
     sendJson(response, 503, { error: 'account_storage_not_configured' });
     return;
