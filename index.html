@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080b14">
   <title>Ilyos | Hisobga kirish</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=2">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -387,11 +387,143 @@
       .auth-layout { align-content: start; }
     }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+    .connection-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      overflow: hidden;
+      place-items: center;
+      padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+      background:
+        radial-gradient(ellipse at 50% 44%, rgba(85, 92, 218, .2), transparent 35%),
+        radial-gradient(ellipse at 12% 10%, rgba(68, 104, 255, .15), transparent 40%),
+        radial-gradient(ellipse at 90% 88%, rgba(170, 74, 218, .14), transparent 40%),
+        #080b14;
+      opacity: 1;
+      transition: opacity .45s ease, visibility .45s ease;
+    }
+    .connection-screen.is-hidden {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .connection-watermark {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      overflow: hidden;
+      place-items: center;
+      color: rgba(176, 164, 255, .045);
+      font: 700 clamp(105px, 24vw, 330px)/1 "Space Grotesk", sans-serif;
+      letter-spacing: -.09em;
+      user-select: none;
+      pointer-events: none;
+    }
+    .connection-watermark span {
+      display: block;
+      animation: watermark-drift 9s ease-in-out infinite alternate;
+    }
+    @keyframes watermark-drift {
+      from { transform: translate3d(-2%, 2%, 0) scale(.96); }
+      to { transform: translate3d(2%, -2%, 0) scale(1.04); }
+    }
+    .connection-content {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 370px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .connection-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 28px;
+      color: #f6f7fb;
+      font: 700 24px "Space Grotesk", sans-serif;
+      letter-spacing: -.045em;
+    }
+    .connection-brand img {
+      width: 54px;
+      height: 54px;
+      padding: 11px;
+      border: 1px solid rgba(178, 154, 255, .4);
+      border-radius: 17px;
+      background: linear-gradient(145deg, rgba(103, 122, 255, .23), rgba(194, 97, 223, .18));
+      box-shadow: 0 10px 38px rgba(115, 93, 255, .24);
+    }
+    .connection-loader {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      margin: 0 auto 19px;
+      border: 2px solid rgba(178, 184, 220, .18);
+      border-top-color: #a99aff;
+      border-right-color: #d385e9;
+      border-radius: 50%;
+      animation: connection-spin .85s linear infinite;
+    }
+    @keyframes connection-spin { to { transform: rotate(360deg); } }
+    .connection-message {
+      min-height: 24px;
+      margin: 0;
+      color: #b6bfd3;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .connection-retry {
+      min-height: 46px;
+      margin-top: 21px;
+      padding: 0 22px;
+      border: 1px solid rgba(193, 176, 255, .28);
+      border-radius: 13px;
+      background: linear-gradient(100deg, #527aff, #875cf4 58%, #bf63df);
+      box-shadow: 0 9px 25px rgba(109, 91, 238, .25);
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: filter .2s ease, transform .2s ease;
+    }
+    .connection-retry:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .connection-retry:focus-visible {
+      outline: 2px solid #c8b6ff;
+      outline-offset: 4px;
+    }
+    .connection-screen.is-offline .connection-loader { display: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .connection-loader, .connection-watermark span { animation: none; }
+    }
+    @media (max-width: 480px) {
+      .connection-brand { gap: 11px; font-size: 21px; }
+      .connection-brand img { width: 49px; height: 49px; }
+      .connection-message { max-width: 280px; font-size: 13px; }
     }
   </style>
 </head>
 <body>
+  <div class="connection-screen" id="connectionScreen" role="status" aria-live="polite">
+    <div class="connection-watermark" aria-hidden="true"><span>ILYOS</span></div>
+    <div class="connection-content">
+      <div class="connection-brand">
+        <img src="./favicon.svg" alt="">
+        <span>ILYOS AI</span>
+      </div>
+      <span class="connection-loader" id="connectionLoader" aria-hidden="true"></span>
+      <p class="connection-message" id="connectionMessage">Internet aloqasi tekshirilmoqda...</p>
+      <button class="connection-retry" id="connectionRetry" type="button" hidden>Qayta urinib ko‘rish</button>
+    </div>
+  </div>
   <main class="auth-layout">
     <section class="story" aria-label="Ilyos AI">
       <a class="brand" href="./home.html">
@@ -761,13 +893,72 @@
     document.querySelectorAll('.primary-button').forEach(button => {
       button.dataset.label = button.textContent;
     });
-    fetch(accountApi, { credentials: 'include' })
-      .then(async response => {
-        if (response.status === 401) return;
-        if (!response.ok) throw new Error(`Account session request failed (${response.status}).`);
-        await completeSignIn(await response.json());
-      })
-      .catch(error => console.error('Existing account session could not be loaded:', error));
+    const connectionScreen = document.getElementById('connectionScreen');
+    const connectionMessage = document.getElementById('connectionMessage');
+    const connectionRetry = document.getElementById('connectionRetry');
+    let connectionCheckInProgress = false;
+    let connectionHideTimer;
+
+    function hideConnectionScreen() {
+      connectionScreen.classList.add('is-hidden');
+      connectionScreen.setAttribute('aria-hidden', 'true');
+      window.clearTimeout(connectionHideTimer);
+      connectionHideTimer = window.setTimeout(() => {
+        connectionScreen.hidden = true;
+      }, 450);
+    }
+
+    async function checkConnection() {
+      if (connectionCheckInProgress) return;
+      connectionCheckInProgress = true;
+      connectionScreen.hidden = false;
+      connectionScreen.classList.remove('is-hidden', 'is-offline');
+      connectionScreen.setAttribute('aria-hidden', 'false');
+      connectionMessage.textContent = 'Internet aloqasi tekshirilmoqda...';
+      connectionRetry.hidden = true;
+
+      const startedAt = performance.now();
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 4000);
+      try {
+        const response = await fetch(accountApi, {
+          credentials: 'include',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        window.clearTimeout(timeout);
+
+        if (response.ok) {
+          try {
+            const result = await response.json();
+            if (result.user) {
+              hideConnectionScreen();
+              await completeSignIn(result);
+              return;
+            }
+          } catch (error) {
+            console.error('Account session response could not be read:', error);
+          }
+        }
+        hideConnectionScreen();
+      } catch (error) {
+        window.clearTimeout(timeout);
+        console.error('Internet connection check failed:', error);
+        const remainingTime = Math.max(0, 4000 - (performance.now() - startedAt));
+        if (remainingTime > 0) {
+          await new Promise(resolve => window.setTimeout(resolve, remainingTime));
+        }
+        connectionScreen.classList.add('is-offline');
+        connectionMessage.textContent = 'Internet ishlamadi. Internetni tekshirib, qayta urinib ko‘ring.';
+        connectionRetry.hidden = false;
+        connectionRetry.focus();
+      } finally {
+        connectionCheckInProgress = false;
+      }
+    }
+
+    connectionRetry.addEventListener('click', checkConnection);
+    checkConnection();
   </script>
 </body>
 </html>
