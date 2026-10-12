@@ -23,8 +23,12 @@ random value of at least 32 bytes. Do not commit real keys or secrets.
 ## Vercel deployment
 
 The root `api/` directory exposes the same API endpoints as Vercel Functions;
-the shared handlers remain in `netlify/functions/`. Set these Vercel
-environment variables:
+the shared handlers remain in `netlify/functions/`. `vercel.json` publishes
+the repository root (including `AI.html`) as static assets while Vercel serves
+the functions under `/api/`. Open `/AI.html` after deployment.
+
+Set these Vercel environment variables before deploying, then redeploy so the
+functions receive them:
 
 - `GEMINI_API_KEY`: required for AI responses.
 - `GMAIL_USER` and `GMAIL_APP_PASSWORD`: required to email sign-in and
